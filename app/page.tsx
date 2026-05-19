@@ -37,6 +37,13 @@ export default function HomePage() {
           <UserButton />
 
           <a
+            href="/dashboard"
+            className="border px-5 py-3 rounded-lg hover:bg-gray-100"
+          >
+            Dashboard
+          </a>
+
+          <a
             href="/vendors"
             className="border px-5 py-3 rounded-lg hover:bg-gray-100"
           >
