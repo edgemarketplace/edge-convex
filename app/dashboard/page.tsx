@@ -65,6 +65,13 @@ export default function DashboardPage() {
           <strong>Role:</strong>{" "}
           {currentUser?.role}
         </p>
+
+        <a
+          href="/dashboard/organizations"
+          className="inline-block mt-6 border px-5 py-3 rounded-lg hover:bg-gray-100"
+        >
+          Manage Organizations
+        </a>
       </div>
     </main>
   );
