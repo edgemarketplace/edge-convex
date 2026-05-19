@@ -2,16 +2,35 @@
 
 import { useState } from "react";
 
+import { useUser } from "@clerk/nextjs";
+
 import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
 
 export default function VendorsPage() {
-  const vendors = useQuery(api.vendors.listVendors);
+  const { user } = useUser();
 
-  const createVendor = useMutation(
-    api.vendors.createVendor
+  const currentUser = useQuery(
+    api.users.currentUser,
+    user
+      ? {
+          clerkId: user.id,
+        }
+      : "skip"
   );
+
+  const organizations = useQuery(
+    api.organizations.listByOwner,
+    currentUser
+      ? {
+          ownerId: currentUser._id,
+        }
+      : "skip"
+  );
+
+  const [organizationId, setOrganizationId] =
+    useState("");
 
   const [companyName, setCompanyName] =
     useState("");
@@ -28,14 +47,40 @@ export default function VendorsPage() {
   const [contactEmail, setContactEmail] =
     useState("");
 
+  const createVendor = useMutation(
+    api.vendors.createVendor
+  );
+
+  const vendors = useQuery(
+    api.vendors.listVendorsByOrganization,
+    organizationId
+      ? {
+          organizationId:
+            organizationId as any,
+        }
+      : "skip"
+  );
+
   async function handleSubmit() {
-    if (!companyName || !category) return;
+    if (
+      !organizationId ||
+      !companyName ||
+      !category
+    )
+      return;
 
     await createVendor({
+      organizationId:
+        organizationId as any,
+
       companyName,
+
       category,
+
       website,
+
       description,
+
       contactEmail,
     });
 
@@ -46,17 +91,46 @@ export default function VendorsPage() {
     setContactEmail("");
   }
 
+  if (!user) {
+    return (
+      <main className="p-10">
+        Please sign in.
+      </main>
+    );
+  }
+
   return (
     <main className="max-w-5xl mx-auto p-10">
       <h1 className="text-4xl font-bold mb-3">
-        Vendor Onboarding
+        Vendor Portal
       </h1>
 
       <p className="text-gray-600 mb-10">
-        Create a vendor profile for Edge Marketplace.
+        Manage organization vendor profiles.
       </p>
 
       <div className="border rounded-2xl p-6 space-y-4">
+        <select
+          className="w-full border rounded-lg p-3"
+          value={organizationId}
+          onChange={(e) =>
+            setOrganizationId(e.target.value)
+          }
+        >
+          <option value="">
+            Select Organization
+          </option>
+
+          {organizations?.map((org) => (
+            <option
+              key={org._id}
+              value={org._id}
+            >
+              {org.name}
+            </option>
+          ))}
+        </select>
+
         <input
           className="w-full border rounded-lg p-3"
           placeholder="Company Name"
@@ -107,13 +181,13 @@ export default function VendorsPage() {
           className="bg-black text-white px-5 py-3 rounded-lg"
           onClick={handleSubmit}
         >
-          Submit Vendor
+          Create Vendor
         </button>
       </div>
 
       <div className="mt-14">
         <h2 className="text-2xl font-bold mb-6">
-          Vendor Directory
+          Organization Vendors
         </h2>
 
         <div className="space-y-5">
