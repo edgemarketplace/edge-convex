@@ -48,6 +48,17 @@ export const listAllVendors = query({
   },
 });
 
+export const listApprovedVendors = query({
+  args: {},
+
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("vendors")
+      .filter((q) => q.eq(q.field("approved"), true))
+      .collect();
+  },
+});
+
 export const approveVendor = mutation({
   args: {
     vendorId: v.id("vendors"),

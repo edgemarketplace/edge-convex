@@ -16,6 +16,15 @@ export default function HomePage() {
         AI-powered procurement and multi-tenant commerce platform.
       </p>
 
+      <div className="flex flex-wrap gap-3 mb-8 justify-center">
+        <a
+          href="/marketplace"
+          className="border px-6 py-3 rounded-lg hover:bg-gray-100"
+        >
+          Marketplace
+        </a>
+      </div>
+
       <Show when="signed-out">
         <div className="flex gap-3">
           <SignInButton mode="modal">
