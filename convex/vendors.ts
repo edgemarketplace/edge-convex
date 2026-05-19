@@ -59,6 +59,22 @@ export const listApprovedVendors = query({
   },
 });
 
+export const getApprovedVendor = query({
+  args: {
+    vendorId: v.id("vendors"),
+  },
+
+  handler: async (ctx, args) => {
+    const vendor = await ctx.db.get(args.vendorId);
+
+    if (!vendor || !vendor.approved) {
+      return null;
+    }
+
+    return vendor;
+  },
+});
+
 export const approveVendor = mutation({
   args: {
     vendorId: v.id("vendors"),

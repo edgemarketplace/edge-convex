@@ -32,15 +32,24 @@ export default function MarketplacePage() {
               <p className="mt-4">{vendor.description}</p>
             )}
 
-            {vendor.website && (
+            <div className="mt-6 flex flex-wrap gap-3">
               <a
-                href={vendor.website}
-                target="_blank"
-                className="inline-block mt-5 text-blue-600"
+                href={`/marketplace/${vendor._id}`}
+                className="bg-black text-white px-4 py-2 rounded-lg"
               >
-                Visit Website
+                View Profile
               </a>
-            )}
+
+              {vendor.website && (
+                <a
+                  href={vendor.website}
+                  target="_blank"
+                  className="border px-4 py-2 rounded-lg"
+                >
+                  Visit Website
+                </a>
+              )}
+            </div>
           </div>
         ))}
       </div>
