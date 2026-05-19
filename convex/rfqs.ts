@@ -2,6 +2,8 @@ import { mutation, query } from "./_generated/server";
 
 import { v } from "convex/values";
 
+import type { Doc } from "./_generated/dataModel";
+
 export const createRFQ = mutation({
   args: {
     organizationId: v.id("organizations"),
@@ -87,12 +89,37 @@ export const listRFQResponses = query({
   },
 
   handler: async (ctx, args) => {
-    return await ctx.db
+    const responses = await ctx.db
       .query("rfqResponses")
       .filter((q) =>
         q.eq(q.field("rfqId"), args.rfqId)
       )
       .order("desc")
       .collect();
+
+    const enriched = await Promise.all(
+      responses.map(async (response) => {
+        let organization: Doc<"organizations"> | null =
+          null;
+
+        if (response.organizationId) {
+          organization = await ctx.db.get(
+            response.organizationId
+          );
+        }
+
+        return {
+          ...response,
+
+          organizationName:
+            organization?.name || "Unknown Organization",
+
+          organizationSlug:
+            organization?.slug || "",
+        };
+      })
+    );
+
+    return enriched;
   },
 });

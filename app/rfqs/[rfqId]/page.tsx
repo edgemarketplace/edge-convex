@@ -188,14 +188,31 @@ export default function RFQDetailPage() {
             key={response._id}
             className="border rounded-2xl p-6"
           >
-            {response.proposedBudget && (
-              <p>
-                <strong>Budget:</strong>{" "}
-                {response.proposedBudget}
-              </p>
-            )}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold">
+                  {response.organizationName}
+                </h3>
 
-            <p className="mt-4 leading-7">
+                {response.organizationSlug && (
+                  <a
+                    href={`/org/${response.organizationSlug}`}
+                    className="text-blue-600 text-sm"
+                  >
+                    Visit Storefront
+                  </a>
+                )}
+              </div>
+
+              {response.proposedBudget && (
+                <p className="text-sm">
+                  <strong>Budget:</strong>{" "}
+                  {response.proposedBudget}
+                </p>
+              )}
+            </div>
+
+            <p className="mt-5 leading-7">
               {response.message}
             </p>
           </div>
