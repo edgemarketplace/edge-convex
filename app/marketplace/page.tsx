@@ -1,10 +1,13 @@
 "use client";
 
 import { useQuery } from "convex/react";
+
 import { api } from "../../convex/_generated/api";
 
 export default function MarketplacePage() {
-  const vendors = useQuery(api.vendors.listApprovedVendors);
+  const vendors = useQuery(
+    api.vendors.listApprovedVendors
+  );
 
   return (
     <main className="max-w-6xl mx-auto p-10">
@@ -13,13 +16,17 @@ export default function MarketplacePage() {
       </h1>
 
       <p className="text-gray-600 mb-10">
-        Discover approved vendors across finance, emerging technology,
+        Discover approved vendors across
+        finance, emerging technology,
         procurement, and commerce.
       </p>
 
       <div className="grid md:grid-cols-2 gap-5">
         {vendors?.map((vendor) => (
-          <div key={vendor._id} className="border rounded-2xl p-6">
+          <div
+            key={vendor._id}
+            className="border rounded-2xl p-6"
+          >
             <h2 className="text-2xl font-semibold">
               {vendor.companyName}
             </h2>
@@ -29,15 +36,19 @@ export default function MarketplacePage() {
             </p>
 
             {vendor.description && (
-              <p className="mt-4">{vendor.description}</p>
+              <p className="mt-4">
+                {vendor.description}
+              </p>
             )}
 
             <div className="mt-6 flex flex-wrap gap-3">
               <a
-                href={`/marketplace/${vendor._id}`}
+                href={`/org/${vendor.companyName
+                  .toLowerCase()
+                  .replace(/\s+/g, "-")}`}
                 className="bg-black text-white px-4 py-2 rounded-lg"
               >
-                View Profile
+                Visit Storefront
               </a>
 
               {vendor.website && (

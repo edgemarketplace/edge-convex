@@ -41,3 +41,18 @@ export const listByOwner = query({
       .collect();
   },
 });
+
+export const getBySlug = query({
+  args: {
+    slug: v.string(),
+  },
+
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("organizations")
+      .filter((q) =>
+        q.eq(q.field("slug"), args.slug)
+      )
+      .first();
+  },
+});

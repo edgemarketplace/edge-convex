@@ -34,17 +34,12 @@ export const listVendorsByOrganization = query({
     return await ctx.db
       .query("vendors")
       .filter((q) =>
-        q.eq(q.field("organizationId"), args.organizationId)
+        q.eq(
+          q.field("organizationId"),
+          args.organizationId
+        )
       )
       .collect();
-  },
-});
-
-export const listAllVendors = query({
-  args: {},
-
-  handler: async (ctx) => {
-    return await ctx.db.query("vendors").collect();
   },
 });
 
@@ -54,7 +49,9 @@ export const listApprovedVendors = query({
   handler: async (ctx) => {
     return await ctx.db
       .query("vendors")
-      .filter((q) => q.eq(q.field("approved"), true))
+      .filter((q) =>
+        q.eq(q.field("approved"), true)
+      )
       .collect();
   },
 });
@@ -65,13 +62,48 @@ export const getApprovedVendor = query({
   },
 
   handler: async (ctx, args) => {
-    const vendor = await ctx.db.get(args.vendorId);
+    const vendor = await ctx.db.get(
+      args.vendorId
+    );
 
     if (!vendor || !vendor.approved) {
       return null;
     }
 
     return vendor;
+  },
+});
+
+export const getApprovedVendorByOrganization =
+  query({
+    args: {
+      organizationId: v.id("organizations"),
+    },
+
+    handler: async (ctx, args) => {
+      return await ctx.db
+        .query("vendors")
+        .filter((q) =>
+          q.and(
+            q.eq(
+              q.field("organizationId"),
+              args.organizationId
+            ),
+            q.eq(
+              q.field("approved"),
+              true
+            )
+          )
+        )
+        .first();
+    },
+  });
+
+export const listAllVendors = query({
+  args: {},
+
+  handler: async (ctx) => {
+    return await ctx.db.query("vendors").collect();
   },
 });
 
