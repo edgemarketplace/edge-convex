@@ -9,6 +9,7 @@
  */
 
 import type * as organizations from "../organizations.js";
+import type * as rfqs from "../rfqs.js";
 import type * as users from "../users.js";
 import type * as vendors from "../vendors.js";
 
@@ -20,6 +21,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   organizations: typeof organizations;
+  rfqs: typeof rfqs;
   users: typeof users;
   vendors: typeof vendors;
 }>;

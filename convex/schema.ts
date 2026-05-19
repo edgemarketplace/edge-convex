@@ -32,6 +32,26 @@ export default defineSchema({
     createdAt: v.number(),
   }),
 
+  rfqs: defineTable({
+    organizationId: v.id("organizations"),
+
+    title: v.string(),
+
+    category: v.string(),
+
+    description: v.string(),
+
+    budget: v.optional(v.string()),
+
+    status: v.union(
+      v.literal("open"),
+      v.literal("in_review"),
+      v.literal("closed")
+    ),
+
+    createdAt: v.number(),
+  }),
+
   sites: defineTable({
     organizationId: v.optional(v.id("organizations")),
     name: v.string(),

@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import type { Doc, Id } from "./_generated/dataModel";
 
 export const createVendor = mutation({
   args: {
@@ -34,10 +35,7 @@ export const listVendorsByOrganization = query({
     return await ctx.db
       .query("vendors")
       .filter((q) =>
-        q.eq(
-          q.field("organizationId"),
-          args.organizationId
-        )
+        q.eq(q.field("organizationId"), args.organizationId)
       )
       .collect();
   },
@@ -47,12 +45,30 @@ export const listApprovedVendors = query({
   args: {},
 
   handler: async (ctx) => {
-    return await ctx.db
+    const vendors = await ctx.db
       .query("vendors")
-      .filter((q) =>
-        q.eq(q.field("approved"), true)
-      )
+      .filter((q) => q.eq(q.field("approved"), true))
       .collect();
+
+    const enriched = await Promise.all(
+      vendors.map(async (vendor) => {
+        let organization: Doc<"organizations"> | null = null;
+
+        if (vendor.organizationId) {
+          organization = await ctx.db.get(
+            vendor.organizationId as Id<"organizations">
+          );
+        }
+
+        return {
+          ...vendor,
+          organizationSlug: organization?.slug || "",
+          organizationName: organization?.name || "",
+        };
+      })
+    );
+
+    return enriched.filter((vendor) => vendor.organizationSlug);
   },
 });
 
@@ -62,9 +78,7 @@ export const getApprovedVendor = query({
   },
 
   handler: async (ctx, args) => {
-    const vendor = await ctx.db.get(
-      args.vendorId
-    );
+    const vendor = await ctx.db.get(args.vendorId);
 
     if (!vendor || !vendor.approved) {
       return null;
@@ -74,30 +88,23 @@ export const getApprovedVendor = query({
   },
 });
 
-export const getApprovedVendorByOrganization =
-  query({
-    args: {
-      organizationId: v.id("organizations"),
-    },
+export const getApprovedVendorByOrganization = query({
+  args: {
+    organizationId: v.id("organizations"),
+  },
 
-    handler: async (ctx, args) => {
-      return await ctx.db
-        .query("vendors")
-        .filter((q) =>
-          q.and(
-            q.eq(
-              q.field("organizationId"),
-              args.organizationId
-            ),
-            q.eq(
-              q.field("approved"),
-              true
-            )
-          )
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("vendors")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("organizationId"), args.organizationId),
+          q.eq(q.field("approved"), true)
         )
-        .first();
-    },
-  });
+      )
+      .first();
+  },
+});
 
 export const listAllVendors = query({
   args: {},

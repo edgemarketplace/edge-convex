@@ -43,9 +43,7 @@ export default function MarketplacePage() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <a
-                href={`/org/${vendor.companyName
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}`}
+                href={`/org/${vendor.organizationSlug}`}
                 className="bg-black text-white px-4 py-2 rounded-lg"
               >
                 Visit Storefront

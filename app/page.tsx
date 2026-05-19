@@ -23,6 +23,13 @@ export default function HomePage() {
         >
           Marketplace
         </a>
+
+        <a
+          href="/rfqs"
+          className="border px-6 py-3 rounded-lg hover:bg-gray-100"
+        >
+          RFQs
+        </a>
       </div>
 
       <Show when="signed-out">
@@ -42,7 +49,7 @@ export default function HomePage() {
       </Show>
 
       <Show when="signed-in">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           <UserButton />
 
           <a
