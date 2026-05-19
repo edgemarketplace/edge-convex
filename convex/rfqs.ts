@@ -44,3 +44,55 @@ export const listRFQs = query({
       .collect();
   },
 });
+
+export const getRFQ = query({
+  args: {
+    rfqId: v.id("rfqs"),
+  },
+
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.rfqId);
+  },
+});
+
+export const createRFQResponse = mutation({
+  args: {
+    rfqId: v.id("rfqs"),
+
+    organizationId: v.id("organizations"),
+
+    message: v.string(),
+
+    proposedBudget: v.optional(v.string()),
+  },
+
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("rfqResponses", {
+      rfqId: args.rfqId,
+
+      organizationId: args.organizationId,
+
+      message: args.message,
+
+      proposedBudget: args.proposedBudget,
+
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const listRFQResponses = query({
+  args: {
+    rfqId: v.id("rfqs"),
+  },
+
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("rfqResponses")
+      .filter((q) =>
+        q.eq(q.field("rfqId"), args.rfqId)
+      )
+      .order("desc")
+      .collect();
+  },
+});

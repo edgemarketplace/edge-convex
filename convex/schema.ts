@@ -52,6 +52,18 @@ export default defineSchema({
     createdAt: v.number(),
   }),
 
+  rfqResponses: defineTable({
+    rfqId: v.id("rfqs"),
+
+    organizationId: v.id("organizations"),
+
+    message: v.string(),
+
+    proposedBudget: v.optional(v.string()),
+
+    createdAt: v.number(),
+  }),
+
   sites: defineTable({
     organizationId: v.optional(v.id("organizations")),
     name: v.string(),

@@ -157,9 +157,10 @@ export default function RFQsPage() {
 
       <div className="mt-14 space-y-5">
         {rfqs?.map((rfq) => (
-          <div
+          <a
             key={rfq._id}
-            className="border rounded-2xl p-6"
+            href={`/rfqs/${rfq._id}`}
+            className="block border rounded-2xl p-6 hover:border-black"
           >
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold">
@@ -185,7 +186,7 @@ export default function RFQsPage() {
             <p className="mt-4 leading-7">
               {rfq.description}
             </p>
-          </div>
+          </a>
         ))}
       </div>
     </main>
