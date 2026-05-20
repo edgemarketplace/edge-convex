@@ -67,6 +67,13 @@ export default function DashboardPage() {
           >
             Operator Console
           </a>
+
+          <a
+            href="/onboarding/storefront"
+            className="border px-5 py-3 rounded-lg hover:bg-gray-100"
+          >
+            Generate Storefront
+          </a>
         </div>
       </div>
     </main>
