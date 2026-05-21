@@ -1,6 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
-import { compileStorefrontBlueprint } from "../lib/blueprints/compiler";
+import { compileStorefrontBlueprint } from "./blueprints/compiler";
 
 export const createStorefrontFromBlueprint = mutation({
   args: {

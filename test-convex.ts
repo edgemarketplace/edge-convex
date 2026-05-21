@@ -1,4 +1,4 @@
-const { ConvexHttpClient } = require("convex/browser");
+import { ConvexHttpClient } from "convex/browser";
 
 const client = new ConvexHttpClient("https://academic-gopher-873.convex.cloud");
 
@@ -11,7 +11,7 @@ async function test() {
       primaryGoal: "products",
       variationMode: "seller",
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Caught Error Class:", error.constructor.name);
     console.log("Error Message:", error.message);
     console.log("Error Data:", error.data);
