@@ -1,11 +1,11 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { ConvexReactClient } from "convex/react";
-import { ConvexProvider } from "convex/react";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
 
 const convex = new ConvexReactClient(
-  // Force connecting to the prod deployment because Vercel preview environments lack the deploy key
-  "https://academic-gopher-873.convex.cloud"
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? "https://academic-gopher-873.convex.cloud"
 );
 
 export function Providers({
@@ -14,8 +14,8 @@ export function Providers({
   children: React.ReactNode;
 }) {
   return (
-    <ConvexProvider client={convex}>
+    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       {children}
-    </ConvexProvider>
+    </ConvexProviderWithClerk>
   );
 }
