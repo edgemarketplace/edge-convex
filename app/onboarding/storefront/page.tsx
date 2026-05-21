@@ -33,7 +33,10 @@ export default function StorefrontOnboarding() {
     } catch (error: any) {
       console.error(error);
       setIsGenerating(false);
-      alert(`Failed to generate storefront: ${error.message || error}`);
+      // In Convex production, error.message is always "Server Error". 
+      // The actual ConvexError message is passed in error.data.
+      const errorMessage = error.data || error.message || String(error);
+      alert(`Failed to generate storefront: ${errorMessage}`);
     }
   };
 
