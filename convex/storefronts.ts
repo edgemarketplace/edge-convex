@@ -14,7 +14,9 @@ export const createStorefrontFromBlueprint = mutation({
       // 1. Authenticate user
       const identity = await ctx.auth.getUserIdentity();
       if (!identity) {
-        throw new ConvexError("Unauthenticated: Please configure CLERK_ISSUER_URL in your Convex Dashboard.");
+        throw new ConvexError(
+          "Unauthenticated: Convex did not receive a valid Clerk token. Verify ConvexProviderWithClerk is deployed and Clerk has a JWT template named 'convex' with audience 'convex'."
+        );
       }
 
       let user = await ctx.db
