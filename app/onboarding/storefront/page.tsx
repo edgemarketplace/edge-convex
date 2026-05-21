@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -81,9 +80,8 @@ export default function StorefrontOnboardingPage() {
   const [error, setError] = useState<string | null>(null);
 
   const currentUser = useQuery(api.users.currentUser, user ? { clerkId: user.id } : "skip");
-  const storefrontApi = (api as any).storefronts;
-  const createStorefrontFromBlueprint = useMutation(storefrontApi.createStorefrontFromBlueprint);
-  const publishStorefront = useMutation(storefrontApi.publishStorefront);
+  const createStorefrontFromBlueprint = useMutation(api.storefronts.createStorefrontFromBlueprint);
+  const publishStorefront = useMutation(api.storefronts.publishStorefront);
 
   async function handleGenerate() {
     if (!currentUser || !businessName.trim()) return;
