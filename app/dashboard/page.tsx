@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -47,33 +48,33 @@ export default function DashboardPage() {
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <a
+          <Link
             href="/dashboard/organizations"
             className="border px-5 py-3 rounded-lg hover:bg-gray-100"
           >
             Manage Organizations
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/vendors"
             className="border px-5 py-3 rounded-lg hover:bg-gray-100"
           >
             Vendor Portal
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/operator"
             className="border px-5 py-3 rounded-lg hover:bg-gray-100"
           >
             Operator Console
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/onboarding/storefront"
             className="border px-5 py-3 rounded-lg hover:bg-gray-100"
           >
             Generate Storefront
-          </a>
+          </Link>
         </div>
       </div>
     </main>

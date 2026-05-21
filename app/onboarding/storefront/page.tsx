@@ -109,10 +109,15 @@ export default function StorefrontOnboardingPage() {
 
       router.push(`/storefront/${result.tenantSlug}`);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Failed to generate storefront";
+      const convexDataMessage =
+        typeof e === "object" && e !== null && "data" in e
+          ? (e as { data?: { message?: string } }).data?.message
+          : undefined;
+      const message = convexDataMessage ?? (e instanceof Error ? e.message : "Failed to generate storefront");
       if (message.includes("Could not find public function for 'storefronts:createStorefrontFromBlueprint'")) {
+        const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL ?? "(missing NEXT_PUBLIC_CONVEX_URL)";
         setError(
-          "Storefront Convex functions are not deployed for this environment yet. Run `npx convex dev` (local) or `npx convex deploy` (production), then redeploy Next.js."
+          `Storefront Convex functions are not deployed for this environment yet.\nConvex URL: ${convexUrl}\nRun \`npx convex deploy\` on the Convex project behind that URL, then redeploy Next.js.`
         );
       } else {
         setError(message);

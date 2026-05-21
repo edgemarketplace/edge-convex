@@ -1,10 +1,9 @@
 "use client";
 
-import { ConvexReactClient } from "convex/react";
-import { ConvexProvider } from "convex/react";
+import { ConvexReactClient, ConvexProvider } from "convex/react";
 
 const convex = new ConvexReactClient(
-  process.env.NEXT_PUBLIC_CONVEX_URL!
+  process.env.NEXT_PUBLIC_CONVEX_URL ?? "https://placeholder.convex.cloud"
 );
 
 export function Providers({
@@ -12,9 +11,5 @@ export function Providers({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <ConvexProvider client={convex}>
-      {children}
-    </ConvexProvider>
-  );
+  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
 }

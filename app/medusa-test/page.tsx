@@ -1,3 +1,13 @@
+type MedusaProduct = {
+  id: string;
+  title?: string;
+  handle?: string;
+};
+
+type MedusaProductsResponse = {
+  products?: MedusaProduct[];
+};
+
 export default async function MedusaTestPage() {
   const backendUrl =
     process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
@@ -5,7 +15,7 @@ export default async function MedusaTestPage() {
   const publishableKey =
     process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY;
 
-  let result: any = null;
+  let result: MedusaProductsResponse | null = null;
   let error: string | null = null;
 
   try {
@@ -67,7 +77,7 @@ export default async function MedusaTestPage() {
       </h2>
 
       <div className="space-y-4">
-        {products.map((product: any) => (
+        {products.map((product) => (
           <div
             key={product.id}
             className="border rounded-xl p-5"
