@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 
 export default function StorefrontOnboarding() {
   const router = useRouter();
@@ -154,10 +154,10 @@ export default function StorefrontOnboarding() {
 
   return (
     <>
-      <SignedIn>
+      <Show when="signed-in">
         {onboardingForm}
-      </SignedIn>
-      <SignedOut>
+      </Show>
+      <Show when="signed-out">
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
           <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center max-w-md w-full">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h1>
@@ -169,7 +169,7 @@ export default function StorefrontOnboarding() {
             </SignInButton>
           </div>
         </div>
-      </SignedOut>
+      </Show>
     </>
   );
 }
