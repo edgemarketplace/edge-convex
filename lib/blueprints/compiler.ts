@@ -47,11 +47,14 @@ function blockProps(type: PuckBlock["type"], metadata: BusinessMetadata): Record
         collectionId: "default",
         itemsPerView: 8,
         filterCategories: true,
+        categoryIds: "",
       };
     case "SocialProof":
       return {
         title: "Trusted by growing teams",
-        items: ["Fast onboarding", "Verified sellers", "Secure transactions"],
+        item1: "Fast onboarding",
+        item2: "Verified sellers",
+        item3: "Secure transactions",
       };
     case "ContentBlock":
       return {
@@ -66,10 +69,10 @@ function blockProps(type: PuckBlock["type"], metadata: BusinessMetadata): Record
     case "AccordionFAQ":
       return {
         title: "Frequently asked questions",
-        items: [
-          { question: "How fast is onboarding?", answer: "Most teams launch in under a day." },
-          { question: "Can I request quotes?", answer: "Yes, RFQs are supported out of the box." },
-        ],
+        q1: "How fast is onboarding?",
+        a1: "Most teams launch in under a day.",
+        q2: "Can I request quotes?",
+        a2: "Yes, RFQs are supported out of the box.",
       };
     default:
       return {};
@@ -104,7 +107,7 @@ export function compileStorefrontBlueprint(args: {
     {
       type: "Footer",
       props: {
-        copyright: `© ${new Date().getFullYear()} ${args.metadata.businessName}`,
+        copyright: `© {{YEAR}} ${args.metadata.businessName}`,
       },
     },
   ];

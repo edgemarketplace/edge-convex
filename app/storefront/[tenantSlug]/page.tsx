@@ -21,8 +21,6 @@ export default function TenantStorefrontPage() {
     return <main className="p-10">Storefront not found.</main>;
   }
 
-  const blocks = Array.isArray(data.renderData?.content) ? data.renderData.content : [];
-
   return (
     <main className="max-w-5xl mx-auto p-8">
       <div className="flex items-center justify-between mb-2">
@@ -31,7 +29,7 @@ export default function TenantStorefrontPage() {
           Edit draft
         </a>
       </div>
-      <StorefrontRenderer blocks={blocks} />
+      <StorefrontRenderer data={data.renderData ?? {}} />
     </main>
   );
 }

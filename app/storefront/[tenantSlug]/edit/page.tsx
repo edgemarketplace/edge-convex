@@ -1,10 +1,19 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import "@puckeditor/core/puck.css";
+
 import { useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
+import { Puck } from "@puckeditor/core";
 import { api } from "../../../../convex/_generated/api";
+import { storefrontPuckConfig } from "@/components/storefront/StorefrontRenderer";
+
+type StorefrontDraftData = {
+  root?: { props?: Record<string, unknown> };
+  content?: Array<{ type: string; props: Record<string, unknown> }>;
+};
 
 export default function StorefrontDraftEditorPage() {
   const params = useParams();
@@ -18,23 +27,18 @@ export default function StorefrontDraftEditorPage() {
 
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const draftRef = useRef<HTMLTextAreaElement | null>(null);
+  const latestDraftRef = useRef<StorefrontDraftData | null>(null);
 
   const storefrontId = data?.storefront?._id;
   const defaultPublisherUserId = data?.tenant?.ownerUserId;
 
-  function parseDraftFromTextarea() {
-    const raw = draftRef.current?.value ?? "{}";
-    return JSON.parse(raw);
-  }
-
-  async function handleSaveDraft() {
+  async function handleSaveDraft(nextData: StorefrontDraftData) {
     if (!storefrontId) return;
     setBusy(true);
     setStatus(null);
     try {
-      const parsed = parseDraftFromTextarea();
-      await updateDraftPuckData({ storefrontId, draftPuckData: parsed });
+      latestDraftRef.current = nextData;
+      await updateDraftPuckData({ storefrontId, draftPuckData: nextData });
       setStatus("Draft saved.");
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Failed to save draft.");
@@ -43,13 +47,15 @@ export default function StorefrontDraftEditorPage() {
     }
   }
 
-  async function handlePublish() {
+  async function handlePublishLive() {
     if (!storefrontId || !defaultPublisherUserId) return;
     setBusy(true);
     setStatus(null);
     try {
-      const parsed = parseDraftFromTextarea();
-      await updateDraftPuckData({ storefrontId, draftPuckData: parsed });
+      const latestDraft = latestDraftRef.current ?? (data?.storefront?.draftPuckData as StorefrontDraftData | undefined);
+      if (latestDraft) {
+        await updateDraftPuckData({ storefrontId, draftPuckData: latestDraft });
+      }
       await publishStorefront({ storefrontId, publishedBy: defaultPublisherUserId });
       setStatus("Published.");
       router.push(`/storefront/${tenantSlug}`);
@@ -63,39 +69,42 @@ export default function StorefrontDraftEditorPage() {
   if (data === undefined) return <main className="p-10">Loading editor...</main>;
   if (!data) return <main className="p-10">Storefront not found.</main>;
 
-  const defaultDraft = JSON.stringify(data.storefront.draftPuckData ?? {}, null, 2);
+  const initialData = (data.storefront.draftPuckData ?? {}) as StorefrontDraftData;
+  if (latestDraftRef.current == null) {
+    latestDraftRef.current = initialData;
+  }
 
   return (
-    <main className="max-w-5xl mx-auto p-8 space-y-4">
-      <h1 className="text-3xl font-bold">Draft Storefront Editor</h1>
-      <p className="text-gray-600">Tenant: {tenantSlug}</p>
-
-      <textarea
-        ref={draftRef}
-        className="w-full h-[520px] border rounded-lg p-4 font-mono text-sm"
-        defaultValue={defaultDraft}
-      />
-
-      {status ? <p className="text-sm text-gray-700">{status}</p> : null}
-
-      <div className="flex gap-3">
-        <button
-          type="button"
-          className="bg-black text-white px-5 py-2 rounded-lg disabled:opacity-50"
-          disabled={busy}
-          onClick={handleSaveDraft}
-        >
-          Save Draft
-        </button>
-        <button
-          type="button"
-          className="border px-5 py-2 rounded-lg disabled:opacity-50"
-          disabled={busy}
-          onClick={handlePublish}
-        >
-          Publish
-        </button>
+    <main className="max-w-[1400px] mx-auto p-4 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Storefront Editor</h1>
+          <p className="text-gray-600 text-sm">Tenant: {tenantSlug}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {status ? <p className="text-sm text-gray-700">{status}</p> : null}
+          <button
+            type="button"
+            className="border px-4 py-2 rounded-lg disabled:opacity-50"
+            disabled={busy}
+            onClick={handlePublishLive}
+          >
+            Publish Live
+          </button>
+        </div>
       </div>
+
+      <Puck
+        key={`${tenantSlug}:${data.storefront.draftVersion}`}
+        config={storefrontPuckConfig}
+        data={initialData as any}
+        onChange={(nextData) => {
+          latestDraftRef.current = nextData as StorefrontDraftData;
+        }}
+        onPublish={(nextData) => {
+          void handleSaveDraft(nextData as StorefrontDraftData);
+        }}
+      />
     </main>
   );
 }
