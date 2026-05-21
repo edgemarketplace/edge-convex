@@ -27,7 +27,7 @@ export default function StorefrontOnboarding() {
     setIsGenerating(true);
     try {
       const tenantSlug = await createStorefront(formData);
-      router.push(`/storefront/${tenantSlug}/editor`);
+      router.push(`/storefront/${tenantSlug}`);
       
       console.log("Storefront generated:", tenantSlug);
     } catch (error: unknown) {
