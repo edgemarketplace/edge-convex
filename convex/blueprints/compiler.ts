@@ -12,12 +12,17 @@ export interface CompileBlueprintInput {
   metadata: BusinessMetadata;
 }
 
+type PuckBlock = {
+  type: "Header" | "HeroSection" | "ProductGrid" | "SocialProof" | "ContentBlock" | "AccordionFAQ" | "ContactForm" | "Footer";
+  props: Record<string, string | number | boolean>;
+};
+
 export function compileStorefrontBlueprint({ vertical, variation, metadata }: CompileBlueprintInput) {
   // Fallbacks if vertical or variation are missing from registry
   const verticalBlueprints = BLUEPRINT_REGISTRY[vertical] || BLUEPRINT_REGISTRY["retail"];
   const blocks = verticalBlueprints[variation] || verticalBlueprints["seller"];
 
-  const content: any[] = [];
+  const content: PuckBlock[] = [];
 
   // Generate deterministic unique IDs for Puck elements
   const generateId = (type: string, index: string | number) => `${type}-${index}`;
@@ -31,7 +36,7 @@ export function compileStorefrontBlueprint({ vertical, variation, metadata }: Co
   });
 
   // 2. Inject the dynamic sequence of blocks
-  blocks.forEach((blockKey, index) => {
+  blocks.forEach((blockKey) => {
     switch (blockKey) {
       case "H":
         content.push({

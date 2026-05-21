@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -28,12 +29,12 @@ export default function VendorDetailPage() {
 
   return (
     <main className="max-w-4xl mx-auto p-10">
-      <a
+      <Link
         href="/marketplace"
         className="text-blue-600 inline-block mb-8"
       >
         ← Back to Marketplace
-      </a>
+      </Link>
 
       <div className="border rounded-2xl p-8">
         <p className="text-sm text-green-600 mb-3">

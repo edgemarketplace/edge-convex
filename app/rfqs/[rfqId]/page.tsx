@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -43,7 +44,7 @@ export default function RFQDetailPage() {
 
     await createResponse({
       rfqId,
-      organizationId: organizationId as any,
+      organizationId: organizationId as Id<"organizations">,
       message,
       proposedBudget,
     });
@@ -58,9 +59,9 @@ export default function RFQDetailPage() {
 
   return (
     <main className="max-w-5xl mx-auto p-10">
-      <a href="/rfqs" className="text-blue-600 inline-block mb-8">
+      <Link href="/rfqs" className="text-blue-600 inline-block mb-8">
         ← Back to RFQs
-      </a>
+      </Link>
 
       <div className="border rounded-3xl p-8">
         <div className="flex items-center justify-between gap-6">

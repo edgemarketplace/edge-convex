@@ -7,6 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 
 export default function VendorsPage() {
   const { user } = useUser();
@@ -56,7 +57,7 @@ export default function VendorsPage() {
     organizationId
       ? {
           organizationId:
-            organizationId as any,
+            organizationId as Id<"organizations">,
         }
       : "skip"
   );
@@ -71,7 +72,7 @@ export default function VendorsPage() {
 
     await createVendor({
       organizationId:
-        organizationId as any,
+        organizationId as Id<"organizations">,
 
       companyName,
 

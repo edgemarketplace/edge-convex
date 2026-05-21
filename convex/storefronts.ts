@@ -62,7 +62,7 @@ export const createStorefrontFromBlueprint = mutation({
       });
 
       // 5. Save storefront draft
-      const storefrontId = await ctx.db.insert("storefronts", {
+      await ctx.db.insert("storefronts", {
         tenantId,
         blueprintVersion: "1.0",
         puckData,
@@ -71,9 +71,10 @@ export const createStorefrontFromBlueprint = mutation({
       });
 
       return slug; // Return slug to redirect user to their editor
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Force any unexpected runtime error (like TypeErrors) to reach the frontend
-      throw new ConvexError(`Backend Error: ${e.message || "Unknown"}`);
+      const message = e instanceof Error ? e.message : "Unknown";
+      throw new ConvexError(`Backend Error: ${message}`);
     }
   },
 });

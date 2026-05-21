@@ -7,6 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 
 export default function RFQsPage() {
   const { user } = useUser();
@@ -61,7 +62,7 @@ export default function RFQsPage() {
 
     await createRFQ({
       organizationId:
-        organizationId as any,
+        organizationId as Id<"organizations">,
 
       title,
 

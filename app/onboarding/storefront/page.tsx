@@ -30,12 +30,17 @@ export default function StorefrontOnboarding() {
       router.push(`/storefront/${tenantSlug}/editor`);
       
       console.log("Storefront generated:", tenantSlug);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       setIsGenerating(false);
-      // In Convex production, error.message is always "Server Error". 
-      // The actual ConvexError message is passed in error.data.
-      const errorMessage = error.data || error.message || String(error);
+      // In Convex production, error.message is often "Server Error".
+      // The actual ConvexError message can be passed in error.data.
+      const errorMessage =
+        typeof error === "object" && error !== null && "data" in error
+          ? String((error as { data?: unknown }).data)
+          : error instanceof Error
+            ? error.message
+            : String(error);
       alert(`Failed to generate storefront: ${errorMessage}`);
     }
   };

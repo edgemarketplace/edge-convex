@@ -4,6 +4,7 @@ import {
   SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -26,20 +27,20 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4 mb-16 w-full">
-          <a
+          <Link
             href="/onboarding/storefront"
             className="group relative inline-flex items-center justify-center px-8 py-4 font-semibold text-white transition-all duration-200 bg-indigo-600 border border-transparent rounded-full hover:bg-indigo-700 hover:shadow-[0_0_40px_rgba(79,70,229,0.4)] hover:-translate-y-0.5"
           >
             Create Storefront
             <svg className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/marketplace"
             className="inline-flex items-center justify-center px-8 py-4 font-semibold text-white transition-all duration-200 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 backdrop-blur-md"
           >
             Explore Markets
-          </a>
+          </Link>
         </div>
 
         <Show when="signed-out">
@@ -63,17 +64,17 @@ export default function HomePage() {
             
             <div className="w-px h-6 bg-white/20" />
 
-            <a href="/dashboard" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            <Link href="/dashboard" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
               Dashboard
-            </a>
+            </Link>
             
-            <a href="/vendors" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            <Link href="/vendors" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
               Vendor Portal
-            </a>
+            </Link>
             
-            <a href="/rfqs" className="px-4 text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            <Link href="/rfqs" className="px-4 text-sm font-medium text-gray-300 hover:text-white transition-colors">
               Manage RFQs
-            </a>
+            </Link>
           </div>
         </Show>
       </div>
