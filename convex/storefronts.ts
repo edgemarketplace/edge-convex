@@ -10,66 +10,71 @@ export const createStorefrontFromBlueprint = mutation({
     variationMode: v.string(),
   },
   handler: async (ctx, args) => {
-    // 1. Authenticate user
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError("Unauthenticated");
-    }
+    try {
+      // 1. Authenticate user
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) {
+        throw new ConvexError("Unauthenticated: Please configure CLERK_ISSUER_URL in your Convex Dashboard.");
+      }
 
-    let user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("clerkId"), identity.subject))
-      .first();
+      let user = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("clerkId"), identity.subject))
+        .first();
 
-    if (!user) {
-      // Auto-create user if webhook hasn't fired or they bypassed initial login steps
-      const newUserId = await ctx.db.insert("users", {
-        clerkId: identity.subject,
-        email: identity.email || "unknown@example.com",
-        name: identity.name || identity.nickname || "Storefront Owner",
-        role: "vendor",
+      if (!user) {
+        // Auto-create user if webhook hasn't fired or they bypassed initial login steps
+        const newUserId = await ctx.db.insert("users", {
+          clerkId: identity.subject,
+          email: identity.email || "unknown@example.com",
+          name: identity.name || identity.nickname || "Storefront Owner",
+          role: "vendor",
+          createdAt: Date.now(),
+        });
+        user = await ctx.db.get(newUserId);
+      }
+
+      if (!user) {
+        throw new ConvexError("Failed to resolve user account.");
+      }
+
+      // 2. Create the tenant slug
+      const slug = args.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+      // 3. Create tenant
+      const tenantId = await ctx.db.insert("tenants", {
+        ownerUserId: user._id,
+        businessName: args.businessName,
+        slug,
+        vertical: args.vertical,
+        variationMode: args.variationMode,
+        status: "active",
         createdAt: Date.now(),
       });
-      user = await ctx.db.get(newUserId);
+
+      // 4. Compile Puck layout
+      const puckData = compileStorefrontBlueprint({
+        vertical: args.vertical,
+        variation: args.variationMode,
+        metadata: {
+          businessName: args.businessName,
+        },
+      });
+
+      // 5. Save storefront draft
+      const storefrontId = await ctx.db.insert("storefronts", {
+        tenantId,
+        blueprintVersion: "1.0",
+        puckData,
+        themeTokens: {},
+        draftVersion: Date.now(),
+      });
+
+      return slug; // Return slug to redirect user to their editor
+    } catch (e: any) {
+      // Force any unexpected runtime error (like TypeErrors) to reach the frontend
+      throw new ConvexError(`Backend Error: ${e.message || "Unknown"}`);
     }
-
-    if (!user) {
-      throw new ConvexError("Failed to resolve user account.");
-    }
-
-    // 2. Create the tenant slug
-    const slug = args.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-
-    // 3. Create tenant
-    const tenantId = await ctx.db.insert("tenants", {
-      ownerUserId: user._id,
-      businessName: args.businessName,
-      slug,
-      vertical: args.vertical,
-      variationMode: args.variationMode,
-      status: "active",
-      createdAt: Date.now(),
-    });
-
-    // 4. Compile Puck layout
-    const puckData = compileStorefrontBlueprint({
-      vertical: args.vertical,
-      variation: args.variationMode,
-      metadata: {
-        businessName: args.businessName,
-      },
-    });
-
-    // 5. Save storefront draft
-    const storefrontId = await ctx.db.insert("storefronts", {
-      tenantId,
-      blueprintVersion: "1.0",
-      puckData,
-      themeTokens: {},
-      draftVersion: Date.now(),
-    });
-
-    return slug; // Return slug to redirect user to their editor
   },
 });
 
