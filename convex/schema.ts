@@ -71,4 +71,23 @@ export default defineSchema({
     published: v.boolean(),
     createdAt: v.number(),
   }),
+
+  tenants: defineTable({
+    ownerUserId: v.id("users"),
+    businessName: v.string(),
+    slug: v.string(),
+    vertical: v.string(),
+    variationMode: v.string(),
+    status: v.string(),
+    createdAt: v.number(),
+  }),
+
+  storefronts: defineTable({
+    tenantId: v.id("tenants"),
+    blueprintVersion: v.string(),
+    puckData: v.any(),
+    themeTokens: v.any(),
+    publishedVersion: v.optional(v.number()),
+    draftVersion: v.optional(v.number()),
+  }),
 });
