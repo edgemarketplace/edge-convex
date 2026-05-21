@@ -1,5 +1,5 @@
 import { mutation, query } from "./_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { compileStorefrontBlueprint } from "../lib/blueprints/compiler";
 
 export const createStorefrontFromBlueprint = mutation({
@@ -13,7 +13,7 @@ export const createStorefrontFromBlueprint = mutation({
     // 1. Authenticate user
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("Unauthenticated");
+      throw new ConvexError("Unauthenticated");
     }
 
     let user = await ctx.db
@@ -34,7 +34,7 @@ export const createStorefrontFromBlueprint = mutation({
     }
 
     if (!user) {
-      throw new Error("Failed to resolve user account.");
+      throw new ConvexError("Failed to resolve user account.");
     }
 
     // 2. Create the tenant slug
