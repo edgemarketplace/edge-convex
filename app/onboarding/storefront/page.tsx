@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
 export default function StorefrontOnboarding() {
   const router = useRouter();
@@ -29,14 +30,14 @@ export default function StorefrontOnboarding() {
       router.push(`/storefront/${tenantSlug}/editor`);
       
       console.log("Storefront generated:", tenantSlug);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       setIsGenerating(false);
-      alert("Failed to generate storefront. Please make sure you are logged in.");
+      alert(`Failed to generate storefront: ${error.message || error}`);
     }
   };
 
-  return (
+  const onboardingForm = (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <div className="text-center">
@@ -149,5 +150,26 @@ export default function StorefrontOnboarding() {
         )}
       </div>
     </div>
+  );
+
+  return (
+    <>
+      <SignedIn>
+        {onboardingForm}
+      </SignedIn>
+      <SignedOut>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center max-w-md w-full">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h1>
+            <p className="text-gray-600 mb-8">You must be logged in to generate a storefront and associate it with your account.</p>
+            <SignInButton mode="modal">
+              <button className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800">
+                Log in to continue
+              </button>
+            </SignInButton>
+          </div>
+        </div>
+      </SignedOut>
+    </>
   );
 }

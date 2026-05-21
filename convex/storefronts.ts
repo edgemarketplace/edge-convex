@@ -16,13 +16,25 @@ export const createStorefrontFromBlueprint = mutation({
       throw new Error("Unauthenticated");
     }
 
-    const user = await ctx.db
+    let user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("clerkId"), identity.subject))
       .first();
 
     if (!user) {
-      throw new Error("User not found");
+      // Auto-create user if webhook hasn't fired or they bypassed initial login steps
+      const newUserId = await ctx.db.insert("users", {
+        clerkId: identity.subject,
+        email: identity.email || "unknown@example.com",
+        name: identity.name || identity.nickname || "Storefront Owner",
+        role: "vendor",
+        createdAt: Date.now(),
+      });
+      user = await ctx.db.get(newUserId);
+    }
+
+    if (!user) {
+      throw new Error("Failed to resolve user account.");
     }
 
     // 2. Create the tenant slug
