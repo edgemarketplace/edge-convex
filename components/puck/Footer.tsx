@@ -16,6 +16,7 @@ export const Footer: React.FC<FooterProps> = ({ businessName, year }) => {
 };
 
 export const footerConfig: ComponentConfig<FooterProps> = {
+  render: Footer,
   fields: {
     businessName: { type: "text" },
     year: { type: "number" },

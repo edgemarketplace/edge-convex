@@ -20,6 +20,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ headline, subheadline 
 };
 
 export const heroSectionConfig: ComponentConfig<HeroSectionProps> = {
+  render: HeroSection,
   fields: {
     headline: { type: "text" },
     subheadline: { type: "text" },

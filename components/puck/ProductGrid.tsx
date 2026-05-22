@@ -30,6 +30,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ source, itemsPerView =
 };
 
 export const productGridConfig: ComponentConfig<ProductGridProps> = {
+  render: ProductGrid,
   fields: {
     source: { 
       type: "select", 

@@ -18,6 +18,7 @@ export const SocialProof: React.FC<SocialProofProps> = ({ headline }) => (
   </section>
 );
 export const socialProofConfig: ComponentConfig<SocialProofProps> = {
+  render: SocialProof,
   fields: { headline: { type: "text" } },
   defaultProps: { headline: "What Our Customers Say" },
 };
@@ -36,6 +37,7 @@ export const AccordionFAQ: React.FC<AccordionFAQProps> = ({ headline }) => (
   </section>
 );
 export const accordionFAQConfig: ComponentConfig<AccordionFAQProps> = {
+  render: AccordionFAQ,
   fields: { headline: { type: "text" } },
   defaultProps: { headline: "Frequently Asked Questions" },
 };
@@ -58,6 +60,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ headline }) => (
   </section>
 );
 export const contactFormConfig: ComponentConfig<ContactFormProps> = {
+  render: ContactForm,
   fields: { headline: { type: "text" } },
   defaultProps: { headline: "Get in Touch" },
 };
@@ -72,6 +75,7 @@ export const ContentBlock: React.FC<ContentBlockProps> = ({ content }) => (
   </section>
 );
 export const contentBlockConfig: ComponentConfig<ContentBlockProps> = {
+  render: ContentBlock,
   fields: { content: { type: "textarea" } },
   defaultProps: { content: "Learn more about our business." },
 };

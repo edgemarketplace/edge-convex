@@ -20,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ businessName, vertical }) => {
 };
 
 export const headerConfig: ComponentConfig<HeaderProps> = {
+  render: Header,
   fields: {
     businessName: { type: "text" },
     vertical: { type: "text" },

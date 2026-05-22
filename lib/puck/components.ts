@@ -22,12 +22,12 @@ export const puckComponents = {
 
 // Configs for Puck editor (used in editor page)
 export const puckComponentConfigs: Record<string, ComponentConfig<any>> = {
-  Header: { fields: { businessName: { type: "text" }, vertical: { type: "text" } }, defaultProps: { businessName: "Your Business", vertical: "retail" } },
-  Footer: { fields: { businessName: { type: "text" }, year: { type: "number" } }, defaultProps: { businessName: "Your Business", year: new Date().getFullYear() } },
-  HeroSection: { fields: { headline: { type: "text" }, subheadline: { type: "text" } }, defaultProps: { headline: "Welcome", subheadline: "Your store" } },
-  ProductGrid: { fields: { source: { type: "select", options: [{ label: "Medusa", value: "medusa" }] }, itemsPerView: { type: "number" } }, defaultProps: { source: "medusa", itemsPerView: 8 } },
-  SocialProof: { fields: { headline: { type: "text" } }, defaultProps: { headline: "What Our Customers Say" } },
-  AccordionFAQ: { fields: { headline: { type: "text" } }, defaultProps: { headline: "FAQ" } },
-  ContactForm: { fields: { headline: { type: "text" } }, defaultProps: { headline: "Contact Us" } },
-  ContentBlock: { fields: { content: { type: "textarea" } }, defaultProps: { content: "Your content here" } },
+  Header: { render: Header, fields: { businessName: { type: "text" }, vertical: { type: "text" } }, defaultProps: { businessName: "Your Business", vertical: "retail" } },
+  Footer: { render: Footer, fields: { businessName: { type: "text" }, year: { type: "number" } }, defaultProps: { businessName: "Your Business", year: new Date().getFullYear() } },
+  HeroSection: { render: HeroSection, fields: { headline: { type: "text" }, subheadline: { type: "text" } }, defaultProps: { headline: "Welcome", subheadline: "Your store" } },
+  ProductGrid: { render: ProductGrid, fields: { source: { type: "select", options: [{ label: "Medusa", value: "medusa" }] }, itemsPerView: { type: "number" } }, defaultProps: { source: "medusa", itemsPerView: 8 } },
+  SocialProof: { render: SocialProof, fields: { headline: { type: "text" } }, defaultProps: { headline: "What Our Customers Say" } },
+  AccordionFAQ: { render: AccordionFAQ, fields: { headline: { type: "text" } }, defaultProps: { headline: "FAQ" } },
+  ContactForm: { render: ContactForm, fields: { headline: { type: "text" } }, defaultProps: { headline: "Contact Us" } },
+  ContentBlock: { render: ContentBlock, fields: { content: { type: "textarea" } }, defaultProps: { content: "Your content here" } },
 };
