@@ -26,7 +26,9 @@ export default function StorefrontEditorPage() {
   const handleChange = async (data: Data) => {
     setSaving(true);
     try {
-      await updateDraft({ tenantId: tenantId as any, puckData: data });
+      // Puck sends full Data { root, content }; store only content array
+      // to stay compatible with StorefrontClient.tsx renderer
+      await updateDraft({ tenantId: tenantId as any, puckData: data.content });
       setLastSavedAt(new Date());
     } catch (err) {
       console.error("Failed to save draft:", err);
@@ -73,7 +75,12 @@ export default function StorefrontEditorPage() {
     );
   }
 
-  const initialData: Data = storefrontData.storefront.puckData || [];
+  const rawPuckData = storefrontData.storefront.puckData;
+
+  const initialData: Data = {
+    root: { props: {} },
+    content: Array.isArray(rawPuckData) ? rawPuckData : [],
+  };
 
   const tenant = storefrontData.tenant!;
 
