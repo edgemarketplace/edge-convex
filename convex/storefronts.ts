@@ -1,7 +1,7 @@
 import { query, mutation, action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { compileStorefrontBlueprint } from "../lib/blueprints/compiler";
 import { BusinessMetadata } from "../lib/blueprints/registry";
 
@@ -136,7 +136,7 @@ export const createStorefront = internalMutation({
 
 export const createStorefrontFromBlueprint = action({
   args: {
-    ownerUserId: v.id("users"),
+    ownerUserId: v.string(), // Clerk user ID (user_xxx)
     businessName: v.string(),
     slug: v.string(),
     vertical: v.string(),
@@ -144,9 +144,15 @@ export const createStorefrontFromBlueprint = action({
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
+    // 0. Look up Convex user doc by Clerk ID
+    const user = await ctx.runQuery(api.users.currentUser, {
+      clerkId: args.ownerUserId,
+    });
+    if (!user) throw new Error(`User not found for clerkId: ${args.ownerUserId}`);
+
     // 1. Create tenant
     const tenantId = await ctx.runMutation(internal.storefronts.createTenant, {
-      ownerUserId: args.ownerUserId,
+      ownerUserId: user._id,
       businessName: args.businessName,
       slug: args.slug,
       vertical: args.vertical,

@@ -12,7 +12,7 @@ export default defineSchema({
       v.literal("admin")
     ),
     createdAt: v.number(),
-  }),
+  }).index("by_clerkId", ["clerkId"]),
 
   organizations: defineTable({
     name: v.string(),

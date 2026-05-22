@@ -12,9 +12,7 @@ export const createUser = mutation({
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("users")
-      .filter((q) =>
-        q.eq(q.field("clerkId"), args.clerkId)
-      )
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .first();
 
     if (existing) {
@@ -39,9 +37,7 @@ export const currentUser = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("users")
-      .filter((q) =>
-        q.eq(q.field("clerkId"), args.clerkId)
-      )
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .first();
   },
 });

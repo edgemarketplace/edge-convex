@@ -43,11 +43,8 @@ export default function StorefrontOnboardingPage() {
     setLoading(true);
     setError("");
     try {
-      // Get Convex user ID from Clerk ID (tokenIdentifier)
-      // In a real implementation, you'd look up the user by tokenIdentifier
-      // For MVP, assume the user exists in Convex users table
       const result = await createStorefront({
-        ownerUserId: user.id as any, // Replace with actual Convex user ID lookup
+        ownerUserId: user.id,
         businessName,
         slug: businessName.toLowerCase().replace(/\s+/g, "-"),
         vertical,
