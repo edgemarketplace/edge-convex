@@ -11,6 +11,14 @@ function assertVertical(value: string): asserts value is Vertical {
   }
 }
 
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
+
 // ========== Queries ==========
 
 export const getStorefrontByTenantId = query({
@@ -38,7 +46,8 @@ export const getStorefrontByTenantSlug = query({
     const tenant = await ctx.db
       .query("tenants")
       .withIndex("by_slug", (q) => q.eq("slug", args.tenantSlug))
-      .unique();
+      .order("desc")
+      .first();
     if (!tenant) return null;
 
     // Lookup storefront by tenantId
@@ -110,7 +119,7 @@ export const createTenant = internalMutation({
     return await ctx.db.insert("tenants", {
       ownerUserId: args.ownerUserId,
       businessName: args.businessName,
-      slug: args.slug,
+      slug: slugify(args.slug),
       vertical: args.vertical,
       variationMode: args.variationMode,
       status: "active",
@@ -159,7 +168,7 @@ export const createStorefrontFromBlueprint = action({
     const tenantId = await ctx.runMutation(internal.storefronts.createTenant, {
       ownerUserId: user._id,
       businessName: args.businessName,
-      slug: args.slug,
+      slug: slugify(args.slug),
       vertical: args.vertical,
       variationMode: args.variationMode,
     }) as Id<"tenants">;
