@@ -91,6 +91,9 @@ export default function RFQsPage() {
 
       <div className="border rounded-2xl p-6 space-y-4">
         <select
+          id="rfq-organization"
+          name="organizationId"
+          autoComplete="off"
           className="w-full border rounded-lg p-3"
           value={organizationId}
           onChange={(e) =>
@@ -112,6 +115,9 @@ export default function RFQsPage() {
         </select>
 
         <input
+          id="rfq-title"
+          name="title"
+          autoComplete="off"
           className="w-full border rounded-lg p-3"
           placeholder="RFQ Title"
           value={title}
@@ -121,6 +127,9 @@ export default function RFQsPage() {
         />
 
         <input
+          id="rfq-category"
+          name="category"
+          autoComplete="off"
           className="w-full border rounded-lg p-3"
           placeholder="Category"
           value={category}
@@ -130,6 +139,9 @@ export default function RFQsPage() {
         />
 
         <input
+          id="rfq-budget"
+          name="budget"
+          autoComplete="off"
           className="w-full border rounded-lg p-3"
           placeholder="Budget"
           value={budget}
@@ -139,6 +151,9 @@ export default function RFQsPage() {
         />
 
         <textarea
+          id="rfq-description"
+          name="description"
+          autoComplete="off"
           rows={5}
           className="w-full border rounded-lg p-3"
           placeholder="Describe procurement requirements..."

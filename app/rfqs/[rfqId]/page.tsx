@@ -129,6 +129,9 @@ export default function RFQDetailPage() {
 
         <div className="space-y-4">
           <select
+            id="rfq-response-organization"
+            name="organizationId"
+            autoComplete="off"
             className="w-full border rounded-lg p-3"
             value={organizationId}
             onChange={(e) => setOrganizationId(e.target.value)}
@@ -143,6 +146,9 @@ export default function RFQDetailPage() {
           </select>
 
           <input
+            id="rfq-response-budget"
+            name="proposedBudget"
+            autoComplete="off"
             className="w-full border rounded-lg p-3"
             placeholder="Proposed Budget"
             value={proposedBudget}
@@ -150,6 +156,9 @@ export default function RFQDetailPage() {
           />
 
           <textarea
+            id="rfq-response-message"
+            name="message"
+            autoComplete="off"
             rows={5}
             className="w-full border rounded-lg p-3"
             placeholder="Vendor response..."

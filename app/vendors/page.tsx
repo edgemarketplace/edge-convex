@@ -112,6 +112,9 @@ export default function VendorsPage() {
 
       <div className="border rounded-2xl p-6 space-y-4">
         <select
+          id="vendor-organization"
+          name="organizationId"
+          autoComplete="off"
           className="w-full border rounded-lg p-3"
           value={organizationId}
           onChange={(e) =>
@@ -133,6 +136,9 @@ export default function VendorsPage() {
         </select>
 
         <input
+          id="vendor-company-name"
+          name="companyName"
+          autoComplete="organization"
           className="w-full border rounded-lg p-3"
           placeholder="Company Name"
           value={companyName}
@@ -142,6 +148,9 @@ export default function VendorsPage() {
         />
 
         <input
+          id="vendor-category"
+          name="category"
+          autoComplete="off"
           className="w-full border rounded-lg p-3"
           placeholder="Category"
           value={category}
@@ -151,6 +160,9 @@ export default function VendorsPage() {
         />
 
         <input
+          id="vendor-website"
+          name="website"
+          autoComplete="url"
           className="w-full border rounded-lg p-3"
           placeholder="Website"
           value={website}
@@ -160,6 +172,9 @@ export default function VendorsPage() {
         />
 
         <input
+          id="vendor-contact-email"
+          name="contactEmail"
+          autoComplete="email"
           className="w-full border rounded-lg p-3"
           placeholder="Contact Email"
           value={contactEmail}
@@ -169,6 +184,9 @@ export default function VendorsPage() {
         />
 
         <textarea
+          id="vendor-description"
+          name="description"
+          autoComplete="off"
           className="w-full border rounded-lg p-3"
           placeholder="Company Description"
           rows={4}

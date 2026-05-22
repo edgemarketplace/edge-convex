@@ -75,6 +75,7 @@ export default function StorefrontOnboardingPage() {
             <input
               id="business-name"
               name="businessName"
+              autoComplete="organization"
               type="text"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
@@ -87,6 +88,7 @@ export default function StorefrontOnboardingPage() {
             <select
               id="vertical"
               name="vertical"
+              autoComplete="off"
               value={vertical}
               onChange={(e) => setVertical(e.target.value)}
               className="w-full border p-2 rounded"
@@ -100,6 +102,7 @@ export default function StorefrontOnboardingPage() {
             <select
               id="primary-goal"
               name="primaryGoal"
+              autoComplete="off"
               value={primaryGoal}
               onChange={(e) => setPrimaryGoal(e.target.value)}
               className="w-full border p-2 rounded"

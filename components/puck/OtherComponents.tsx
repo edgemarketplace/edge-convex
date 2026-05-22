@@ -50,11 +50,11 @@ export const ContactForm = ({ headline }: ContactFormProps) => (
       <h2 className="text-2xl font-bold mb-8 text-center">{headline || "Get in Touch"}</h2>
       <form className="max-w-md mx-auto space-y-4">
         <label htmlFor="contact-name" className="sr-only">Name</label>
-        <input id="contact-name" name="name" type="text" placeholder="Name" className="w-full border p-2 rounded" />
+        <input id="contact-name" name="name" autoComplete="name" type="text" placeholder="Name" className="w-full border p-2 rounded" />
         <label htmlFor="contact-email" className="sr-only">Email</label>
-        <input id="contact-email" name="email" type="email" placeholder="Email" className="w-full border p-2 rounded" />
+        <input id="contact-email" name="email" autoComplete="email" type="email" placeholder="Email" className="w-full border p-2 rounded" />
         <label htmlFor="contact-message" className="sr-only">Message</label>
-        <textarea id="contact-message" name="message" placeholder="Message" className="w-full border p-2 rounded h-32"></textarea>
+        <textarea id="contact-message" name="message" autoComplete="off" placeholder="Message" className="w-full border p-2 rounded h-32"></textarea>
         <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
           Send Message
         </button>

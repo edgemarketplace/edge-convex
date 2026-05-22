@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -43,6 +43,23 @@ function normalizePuckContent(rawPuckData: unknown): StorefrontPuckData {
   }) as StorefrontPuckData;
 }
 
+function patchEditorFormFieldAttributes() {
+  const fields = document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+    "input, select, textarea"
+  );
+
+  fields.forEach((field, index) => {
+    const label = field.getAttribute("title") || field.getAttribute("aria-label") || field.getAttribute("placeholder");
+    const generatedName = label
+      ? label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")
+      : `editor-field-${index}`;
+
+    if (!field.id) field.id = generatedName;
+    if (!field.name) field.name = generatedName;
+    if (!field.autocomplete) field.autocomplete = "off";
+  });
+}
+
 export default function StorefrontEditorPage() {
   const params = useParams();
   const router = useRouter();
@@ -57,6 +74,17 @@ export default function StorefrontEditorPage() {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+
+  useEffect(() => {
+    patchEditorFormFieldAttributes();
+
+    const observer = new MutationObserver(() => {
+      patchEditorFormFieldAttributes();
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
 
   const handleChange = async (data: Data<PuckComponentProps>) => {
     setSaving(true);

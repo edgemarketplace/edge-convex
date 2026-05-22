@@ -50,7 +50,13 @@ export default function OrganizationsPage() {
       </p>
 
       <div className="border rounded-2xl p-6 space-y-4">
+        <label htmlFor="organization-name" className="sr-only">
+          Organization name
+        </label>
         <input
+          id="organization-name"
+          name="organizationName"
+          autoComplete="organization"
           className="w-full border rounded-lg p-3"
           placeholder="Organization name"
           value={name}
