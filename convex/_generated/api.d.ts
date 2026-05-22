@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as blueprints_compiler from "../blueprints/compiler.js";
+import type * as blueprints_registry from "../blueprints/registry.js";
 import type * as organizations from "../organizations.js";
 import type * as rfqs from "../rfqs.js";
 import type * as storefronts from "../storefronts.js";
@@ -21,6 +23,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "blueprints/compiler": typeof blueprints_compiler;
+  "blueprints/registry": typeof blueprints_registry;
   organizations: typeof organizations;
   rfqs: typeof rfqs;
   storefronts: typeof storefronts;

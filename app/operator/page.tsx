@@ -20,7 +20,7 @@ export default function OperatorPage() {
       </p>
 
       <div className="space-y-5">
-        {vendors?.map((vendor) => (
+        {vendors?.map((vendor: any) => (
           <div key={vendor._id} className="border rounded-xl p-5">
             <div className="flex items-start justify-between gap-6">
               <div>

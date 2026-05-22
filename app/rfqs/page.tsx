@@ -101,7 +101,7 @@ export default function RFQsPage() {
             Select Organization
           </option>
 
-          {organizations?.map((org) => (
+          {organizations?.map((org: any) => (
             <option
               key={org._id}
               value={org._id}
@@ -157,7 +157,7 @@ export default function RFQsPage() {
       </div>
 
       <div className="mt-14 space-y-5">
-        {rfqs?.map((rfq) => (
+        {rfqs?.map((rfq: any) => (
           <a
             key={rfq._id}
             href={`/rfqs/${rfq._id}`}

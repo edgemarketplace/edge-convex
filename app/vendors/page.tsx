@@ -122,7 +122,7 @@ export default function VendorsPage() {
             Select Organization
           </option>
 
-          {organizations?.map((org) => (
+          {organizations?.map((org: any) => (
             <option
               key={org._id}
               value={org._id}
@@ -192,7 +192,7 @@ export default function VendorsPage() {
         </h2>
 
         <div className="space-y-5">
-          {vendors?.map((vendor) => (
+          {vendors?.map((vendor: any) => (
             <div
               key={vendor._id}
               className="border rounded-xl p-5"

@@ -80,7 +80,8 @@ export default defineSchema({
     variationMode: v.string(),
     status: v.string(),
     createdAt: v.number(),
-  }),
+  }).index("by_slug", ["slug"])
+    .index("by_owner", ["ownerUserId"]),
 
   storefronts: defineTable({
     tenantId: v.id("tenants"),
@@ -89,5 +90,5 @@ export default defineSchema({
     themeTokens: v.any(),
     publishedVersion: v.optional(v.number()),
     draftVersion: v.optional(v.number()),
-  }),
+  }).index("by_tenant", ["tenantId"]),
 });

@@ -130,7 +130,7 @@ export default function RFQDetailPage() {
           >
             <option value="">Select Organization</option>
 
-            {organizations?.map((org) => (
+            {organizations?.map((org: any) => (
               <option key={org._id} value={org._id}>
                 {org.name}
               </option>
@@ -164,7 +164,7 @@ export default function RFQDetailPage() {
       <div className="mt-10 space-y-5">
         <h2 className="text-3xl font-bold">Responses</h2>
 
-        {responses?.map((response) => (
+        {responses?.map((response: any) => (
           <div key={response._id} className="border rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div>

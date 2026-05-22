@@ -1,101 +1,23 @@
-import { mutation, query } from "./_generated/server";
-import { v, ConvexError } from "convex/values";
-import { compileStorefrontBlueprint } from "./blueprints/compiler";
+import { query, mutation, action, internalMutation } from "./_generated/server";
+import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
+import { compileStorefrontBlueprint } from "../lib/blueprints/compiler";
+import { BusinessMetadata } from "../lib/blueprints/registry";
 
-export const createStorefrontFromBlueprint = mutation({
-  args: {
-    businessName: v.string(),
-    vertical: v.string(),
-    primaryGoal: v.string(),
-    variationMode: v.string(),
-  },
+// ========== Queries ==========
+
+export const getStorefrontByTenantId = query({
+  args: { tenantId: v.id("tenants") },
   handler: async (ctx, args) => {
-    try {
-      // 1. Authenticate user
-      const identity = await ctx.auth.getUserIdentity();
-      if (!identity) {
-        throw new ConvexError(
-          "Unauthenticated: Convex did not receive a valid Clerk token. Verify ConvexProviderWithClerk is deployed and Clerk has a JWT template named 'convex' with audience 'convex'."
-        );
-      }
-
-      let user = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("clerkId"), identity.subject))
-        .first();
-
-      if (!user) {
-        // Auto-create user if webhook hasn't fired or they bypassed initial login steps
-        const newUserId = await ctx.db.insert("users", {
-          clerkId: identity.subject,
-          email: identity.email || "unknown@example.com",
-          name: identity.name || identity.nickname || "Storefront Owner",
-          role: "vendor",
-          createdAt: Date.now(),
-        });
-        user = await ctx.db.get(newUserId);
-      }
-
-      if (!user) {
-        throw new ConvexError("Failed to resolve user account.");
-      }
-
-      // 2. Create the tenant slug
-      const slug = args.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-
-      // 3. Create tenant
-      const tenantId = await ctx.db.insert("tenants", {
-        ownerUserId: user._id,
-        businessName: args.businessName,
-        slug,
-        vertical: args.vertical,
-        variationMode: args.variationMode,
-        status: "active",
-        createdAt: Date.now(),
-      });
-
-      // 4. Compile Puck layout
-      const puckData = compileStorefrontBlueprint({
-        vertical: args.vertical,
-        variation: args.variationMode,
-        metadata: {
-          businessName: args.businessName,
-        },
-      });
-
-      // 5. Save storefront draft
-      await ctx.db.insert("storefronts", {
-        tenantId,
-        blueprintVersion: "1.0",
-        puckData,
-        themeTokens: {},
-        draftVersion: Date.now(),
-      });
-
-      return slug; // Return slug to redirect user to their editor
-    } catch (e: unknown) {
-      // Force any unexpected runtime error (like TypeErrors) to reach the frontend
-      const message = e instanceof Error ? e.message : "Unknown";
-      throw new ConvexError(`Backend Error: ${message}`);
-    }
-  },
-});
-
-export const getStorefrontByTenantSlug = query({
-  args: { slug: v.string() },
-  handler: async (ctx, args) => {
-    const tenant = await ctx.db
-      .query("tenants")
-      .filter((q) => q.eq(q.field("slug"), args.slug))
-      .first();
-
-    if (!tenant) return null;
-
     const storefront = await ctx.db
       .query("storefronts")
-      .filter((q) => q.eq(q.field("tenantId"), tenant._id))
-      .first();
-
+      .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
+      .unique();
+    if (!storefront) return null;
+    
+    const tenant = await ctx.db.get(storefront.tenantId);
+    
     return {
       tenant,
       storefront,
@@ -103,32 +25,154 @@ export const getStorefrontByTenantSlug = query({
   },
 });
 
+export const getStorefrontByTenantSlug = query({
+  args: { tenantSlug: v.string() },
+  handler: async (ctx, args) => {
+    // Lookup tenant by slug
+    const tenant = await ctx.db
+      .query("tenants")
+      .withIndex("by_slug", (q) => q.eq("slug", args.tenantSlug))
+      .unique();
+    if (!tenant) return null;
+
+    // Lookup storefront by tenantId
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", tenant._id))
+      .unique();
+    if (!storefront) return null;
+
+    return { tenant, storefront };
+  },
+});
+
+// ========== Mutations ==========
+
 export const updateDraftPuckData = mutation({
   args: {
-    storefrontId: v.id("storefronts"),
+    tenantId: v.id("tenants"),
     puckData: v.any(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthenticated");
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
+      .unique();
+    if (!storefront) throw new Error("Storefront not found for tenant");
 
-    await ctx.db.patch(args.storefrontId, {
+    const newDraftVersion = (storefront.draftVersion || 0) + 1;
+    await ctx.db.patch(storefront._id, {
       puckData: args.puckData,
-      draftVersion: Date.now(),
+      draftVersion: newDraftVersion,
     });
+    return newDraftVersion;
   },
 });
 
 export const publishStorefront = mutation({
+  args: { tenantId: v.id("tenants") },
+  handler: async (ctx, args) => {
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
+      .unique();
+    if (!storefront) throw new Error("Storefront not found for tenant");
+    if (!storefront.puckData) throw new Error("No draft puckData to publish");
+
+    const newPublishedVersion = (storefront.publishedVersion || 0) + 1;
+    await ctx.db.patch(storefront._id, {
+      publishedVersion: newPublishedVersion,
+      // Copy draft puckData to published version
+      puckData: storefront.puckData,
+    });
+    return newPublishedVersion;
+  },
+});
+
+// ========== Internal Mutations ==========
+
+export const createTenant = internalMutation({
   args: {
-    storefrontId: v.id("storefronts"),
+    ownerUserId: v.id("users"),
+    businessName: v.string(),
+    slug: v.string(),
+    vertical: v.string(),
+    variationMode: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthenticated");
-
-    await ctx.db.patch(args.storefrontId, {
-      publishedVersion: Date.now(),
+    const now = Date.now();
+    return await ctx.db.insert("tenants", {
+      ownerUserId: args.ownerUserId,
+      businessName: args.businessName,
+      slug: args.slug,
+      vertical: args.vertical,
+      variationMode: args.variationMode,
+      status: "active",
+      createdAt: now,
     });
+  },
+});
+
+export const createStorefront = internalMutation({
+  args: {
+    tenantId: v.id("tenants"),
+    blueprintVersion: v.string(),
+    puckData: v.any(),
+    themeTokens: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("storefronts", {
+      tenantId: args.tenantId,
+      blueprintVersion: args.blueprintVersion,
+      puckData: args.puckData,
+      themeTokens: args.themeTokens || {},
+      draftVersion: 1,
+      publishedVersion: undefined,
+    });
+  },
+});
+
+// ========== Actions ==========
+
+export const createStorefrontFromBlueprint = action({
+  args: {
+    ownerUserId: v.id("users"),
+    businessName: v.string(),
+    slug: v.string(),
+    vertical: v.string(),
+    variationMode: v.string(),
+    metadata: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    // 1. Create tenant
+    const tenantId = await ctx.runMutation(internal.storefronts.createTenant, {
+      ownerUserId: args.ownerUserId,
+      businessName: args.businessName,
+      slug: args.slug,
+      vertical: args.vertical,
+      variationMode: args.variationMode,
+    }) as Id<"tenants">;
+
+    // 2. Compile blueprint
+    const businessMetadata: BusinessMetadata = {
+      businessName: args.businessName,
+      vertical: args.vertical,
+      variationMode: args.variationMode,
+    };
+    const puckData = compileStorefrontBlueprint({
+      vertical: args.vertical as any,
+      variation: args.variationMode,
+      metadata: businessMetadata,
+    });
+
+    // 3. Create storefront with compiled puckData
+    const storefrontId = await ctx.runMutation(internal.storefronts.createStorefront, {
+      tenantId,
+      blueprintVersion: `${args.vertical}-${args.variationMode}-1.0`,
+      puckData,
+      themeTokens: { primaryColor: "#000000", secondaryColor: "#ffffff" },
+    }) as Id<"storefronts">;
+
+    return { tenantId, storefrontId };
   },
 });

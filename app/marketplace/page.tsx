@@ -22,7 +22,7 @@ export default function MarketplacePage() {
       </p>
 
       <div className="grid md:grid-cols-2 gap-5">
-        {vendors?.map((vendor) => (
+        {vendors?.map((vendor: any) => (
           <div
             key={vendor._id}
             className="border rounded-2xl p-6"
