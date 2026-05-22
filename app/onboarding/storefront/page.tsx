@@ -70,8 +70,10 @@ export default function StorefrontOnboardingPage() {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Step 1: Business Details</h2>
           <div>
-            <label className="block mb-1">Business Name</label>
+            <label htmlFor="business-name" className="block mb-1">Business Name</label>
             <input
+              id="business-name"
+              name="businessName"
               type="text"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
@@ -80,8 +82,10 @@ export default function StorefrontOnboardingPage() {
             />
           </div>
           <div>
-            <label className="block mb-1">Vertical</label>
+            <label htmlFor="vertical" className="block mb-1">Vertical</label>
             <select
+              id="vertical"
+              name="vertical"
               value={vertical}
               onChange={(e) => setVertical(e.target.value)}
               className="w-full border p-2 rounded"
@@ -91,8 +95,10 @@ export default function StorefrontOnboardingPage() {
             </select>
           </div>
           <div>
-            <label className="block mb-1">Primary Goal</label>
+            <label htmlFor="primary-goal" className="block mb-1">Primary Goal</label>
             <select
+              id="primary-goal"
+              name="primaryGoal"
               value={primaryGoal}
               onChange={(e) => setPrimaryGoal(e.target.value)}
               className="w-full border p-2 rounded"

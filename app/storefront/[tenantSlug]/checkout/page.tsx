@@ -42,8 +42,10 @@ export default function CheckoutPage() {
           <div className="mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Contact Information</h2>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email Address</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
               <input 
+                id="email"
+                name="email"
                 type="email" 
                 required 
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black"
@@ -56,24 +58,24 @@ export default function CheckoutPage() {
             <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Shipping Details</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
-                <input type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
+                <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">First Name</label>
+                <input id="first-name" name="firstName" type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                <input type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
+                <label htmlFor="last-name" className="block text-sm font-medium text-gray-700">Last Name</label>
+                <input id="last-name" name="lastName" type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Address</label>
-                <input type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
+                <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
+                <input id="address" name="address" type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">City</label>
-                <input type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
+                <input id="city" name="city" type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">ZIP / Postal Code</label>
-                <input type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
+                <label htmlFor="zip" className="block text-sm font-medium text-gray-700">ZIP / Postal Code</label>
+                <input id="zip" name="zip" type="text" required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-black focus:border-black" />
               </div>
             </div>
           </div>
