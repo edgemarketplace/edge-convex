@@ -5,7 +5,7 @@ export type HeaderProps = {
   vertical?: string;
 };
 
-export const Header: React.FC<HeaderProps> = ({ businessName, vertical }) => {
+export const Header = ({ businessName, vertical }: HeaderProps) => {
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">

@@ -7,7 +7,7 @@ export type ProductGridProps = {
   filterCategories?: boolean;
 };
 
-export const ProductGrid: React.FC<ProductGridProps> = ({ source, itemsPerView = 8 }) => {
+export const ProductGrid = ({ source, itemsPerView = 8 }: ProductGridProps) => {
   return (
     <section className="max-w-7xl mx-auto px-4 py-12">
       <h2 className="text-2xl font-bold mb-8">Our Products</h2>

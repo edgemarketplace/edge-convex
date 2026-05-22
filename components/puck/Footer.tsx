@@ -5,7 +5,7 @@ export type FooterProps = {
   year?: number;
 };
 
-export const Footer: React.FC<FooterProps> = ({ businessName, year }) => {
+export const Footer = ({ businessName, year }: FooterProps) => {
   return (
     <footer className="bg-gray-50 border-t">
       <div className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">

@@ -5,7 +5,7 @@ export type HeroSectionProps = {
   subheadline?: string;
 };
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ headline, subheadline }) => {
+export const HeroSection = ({ headline, subheadline }: HeroSectionProps) => {
   return (
     <section className="bg-blue-50 py-20">
       <div className="max-w-7xl mx-auto px-4 text-center">

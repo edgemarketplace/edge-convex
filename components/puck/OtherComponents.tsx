@@ -2,7 +2,7 @@ import { ComponentConfig } from "@puckeditor/core";
 
 // SocialProof
 export type SocialProofProps = { headline?: string };
-export const SocialProof: React.FC<SocialProofProps> = ({ headline }) => (
+export const SocialProof = ({ headline }: SocialProofProps) => (
   <section className="bg-gray-50 py-12">
     <div className="max-w-7xl mx-auto px-4">
       <h2 className="text-2xl font-bold mb-8 text-center">{headline || "What Our Customers Say"}</h2>
@@ -25,7 +25,7 @@ export const socialProofConfig: ComponentConfig<SocialProofProps> = {
 
 // AccordionFAQ
 export type AccordionFAQProps = { headline?: string };
-export const AccordionFAQ: React.FC<AccordionFAQProps> = ({ headline }) => (
+export const AccordionFAQ = ({ headline }: AccordionFAQProps) => (
   <section className="max-w-7xl mx-auto px-4 py-12">
     <h2 className="text-2xl font-bold mb-8">{headline || "Frequently Asked Questions"}</h2>
     {[1,2,3].map(i => (
@@ -44,7 +44,7 @@ export const accordionFAQConfig: ComponentConfig<AccordionFAQProps> = {
 
 // ContactForm
 export type ContactFormProps = { headline?: string };
-export const ContactForm: React.FC<ContactFormProps> = ({ headline }) => (
+export const ContactForm = ({ headline }: ContactFormProps) => (
   <section className="bg-blue-50 py-12">
     <div className="max-w-7xl mx-auto px-4">
       <h2 className="text-2xl font-bold mb-8 text-center">{headline || "Get in Touch"}</h2>
@@ -67,7 +67,7 @@ export const contactFormConfig: ComponentConfig<ContactFormProps> = {
 
 // ContentBlock
 export type ContentBlockProps = { content?: string };
-export const ContentBlock: React.FC<ContentBlockProps> = ({ content }) => (
+export const ContentBlock = ({ content }: ContentBlockProps) => (
   <section className="max-w-7xl mx-auto px-4 py-12">
     <div className="prose max-w-none">
       {content || <p>Add your content here.</p>}
