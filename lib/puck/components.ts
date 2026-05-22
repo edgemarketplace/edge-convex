@@ -1,9 +1,8 @@
-import { ComponentConfig } from "@puckeditor/core";
 import { Header } from "../../components/puck/Header";
 import { Footer } from "../../components/puck/Footer";
 import { HeroSection } from "../../components/puck/HeroSection";
 import { ProductGrid } from "../../components/puck/ProductGrid";
-import { SocialProof, SocialProofProps } from "../../components/puck/OtherComponents";
+import { SocialProof } from "../../components/puck/OtherComponents";
 import { AccordionFAQ } from "../../components/puck/OtherComponents";
 import { ContactForm } from "../../components/puck/OtherComponents";
 import { ContentBlock } from "../../components/puck/OtherComponents";
@@ -15,6 +14,7 @@ import { socialProofConfig } from "../../components/puck/OtherComponents";
 import { accordionFAQConfig } from "../../components/puck/OtherComponents";
 import { contactFormConfig } from "../../components/puck/OtherComponents";
 import { contentBlockConfig } from "../../components/puck/OtherComponents";
+import type { PuckConfigMap, StorefrontPuckConfig } from "./types";
 
 // Component map for Puck renderer
 export const puckComponents = {
@@ -29,7 +29,7 @@ export const puckComponents = {
 };
 
 // Configs for Puck editor (used in editor page)
-export const puckComponentConfigs: Record<string, ComponentConfig<any>> = {
+export const puckComponentConfigs: PuckConfigMap = {
   Header: headerConfig,
   Footer: footerConfig,
   HeroSection: heroSectionConfig,
@@ -38,4 +38,8 @@ export const puckComponentConfigs: Record<string, ComponentConfig<any>> = {
   AccordionFAQ: accordionFAQConfig,
   ContactForm: contactFormConfig,
   ContentBlock: contentBlockConfig,
+};
+
+export const puckConfig: StorefrontPuckConfig = {
+  components: puckComponentConfigs,
 };

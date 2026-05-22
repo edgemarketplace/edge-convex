@@ -19,7 +19,7 @@ export const createRFQ = mutation({
       title: args.title,
       category: args.category,
       description: args.description,
-      budget: args.budget,
+      ...(args.budget ? { budget: args.budget } : {}),
       status: "open",
       createdAt: Date.now(),
     });
@@ -30,7 +30,7 @@ export const listRFQs = query({
   args: {},
 
   handler: async (ctx) => {
-    return await ctx.db.query("rfqs").order("desc").collect();
+    return await ctx.db.query("rfqs").order("desc").take(100);
   },
 });
 
@@ -74,7 +74,7 @@ export const createRFQResponse = mutation({
       rfqId: args.rfqId,
       organizationId: args.organizationId,
       message: args.message,
-      proposedBudget: args.proposedBudget,
+      ...(args.proposedBudget ? { proposedBudget: args.proposedBudget } : {}),
       createdAt: Date.now(),
     });
   },

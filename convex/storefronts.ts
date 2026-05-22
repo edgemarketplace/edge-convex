@@ -3,7 +3,13 @@ import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { api, internal } from "./_generated/api";
 import { compileStorefrontBlueprint } from "../lib/blueprints/compiler";
-import { BusinessMetadata } from "../lib/blueprints/registry";
+import { blueprints, BusinessMetadata, Vertical } from "../lib/blueprints/registry";
+
+function assertVertical(value: string): asserts value is Vertical {
+  if (!(value in blueprints)) {
+    throw new Error(`Unsupported vertical: ${value}`);
+  }
+}
 
 // ========== Queries ==========
 
@@ -127,7 +133,6 @@ export const createStorefront = internalMutation({
       puckData: args.puckData,
       themeTokens: args.themeTokens || {},
       draftVersion: 1,
-      publishedVersion: undefined,
     });
   },
 });
@@ -160,13 +165,14 @@ export const createStorefrontFromBlueprint = action({
     }) as Id<"tenants">;
 
     // 2. Compile blueprint
+    assertVertical(args.vertical);
     const businessMetadata: BusinessMetadata = {
       businessName: args.businessName,
       vertical: args.vertical,
       variationMode: args.variationMode,
     };
     const puckData = compileStorefrontBlueprint({
-      vertical: args.vertical as any,
+      vertical: args.vertical,
       variation: args.variationMode,
       metadata: businessMetadata,
     });

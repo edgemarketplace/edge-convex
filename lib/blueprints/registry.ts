@@ -1,4 +1,6 @@
 // Blueprint registry: hard-coded first, database later
+import type { PuckComponentName } from "../puck/types";
+
 export type Vertical = "retail" | "pro";
 export type VariationMode = "seller" | "pro" | "storyteller" | "minimalist" | "converter" | "local";
 
@@ -34,7 +36,7 @@ export const blueprints: Record<Vertical, BlueprintDefinition> = {
 };
 
 // Map block keys to Puck component types
-export const BLOCK_KEY_MAP: Record<BlockKey, string> = {
+export const BLOCK_KEY_MAP: Record<BlockKey, PuckComponentName> = {
   H: "HeroSection",
   O: "ProductGrid",
   P: "SocialProof",

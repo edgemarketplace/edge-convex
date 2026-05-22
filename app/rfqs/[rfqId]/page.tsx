@@ -6,7 +6,12 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../../convex/_generated/dataModel";
+
+type RFQResponse = Doc<"rfqResponses"> & {
+  organizationName: string;
+  organizationSlug: string;
+};
 
 export default function RFQDetailPage() {
   const { user } = useUser();
@@ -130,7 +135,7 @@ export default function RFQDetailPage() {
           >
             <option value="">Select Organization</option>
 
-            {organizations?.map((org: any) => (
+            {organizations?.map((org: Doc<"organizations">) => (
               <option key={org._id} value={org._id}>
                 {org.name}
               </option>
@@ -164,7 +169,7 @@ export default function RFQDetailPage() {
       <div className="mt-10 space-y-5">
         <h2 className="text-3xl font-bold">Responses</h2>
 
-        {responses?.map((response: any) => (
+        {responses?.map((response: RFQResponse) => (
           <div key={response._id} className="border rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div>

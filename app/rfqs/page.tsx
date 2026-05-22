@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../convex/_generated/dataModel";
 
 export default function RFQsPage() {
   const { user } = useUser();
@@ -101,7 +101,7 @@ export default function RFQsPage() {
             Select Organization
           </option>
 
-          {organizations?.map((org: any) => (
+          {organizations?.map((org: Doc<"organizations">) => (
             <option
               key={org._id}
               value={org._id}
@@ -157,7 +157,7 @@ export default function RFQsPage() {
       </div>
 
       <div className="mt-14 space-y-5">
-        {rfqs?.map((rfq: any) => (
+        {rfqs?.map((rfq: Doc<"rfqs">) => (
           <a
             key={rfq._id}
             href={`/rfqs/${rfq._id}`}

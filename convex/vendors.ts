@@ -17,9 +17,9 @@ export const createVendor = mutation({
       organizationId: args.organizationId,
       companyName: args.companyName,
       category: args.category,
-      website: args.website,
-      description: args.description,
-      contactEmail: args.contactEmail,
+      ...(args.website ? { website: args.website } : {}),
+      ...(args.description ? { description: args.description } : {}),
+      ...(args.contactEmail ? { contactEmail: args.contactEmail } : {}),
       approved: false,
       createdAt: Date.now(),
     });
@@ -34,10 +34,8 @@ export const listVendorsByOrganization = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("vendors")
-      .filter((q) =>
-        q.eq(q.field("organizationId"), args.organizationId)
-      )
-      .collect();
+      .withIndex("by_organizationId", (q) => q.eq("organizationId", args.organizationId))
+      .take(100);
   },
 });
 
@@ -47,8 +45,8 @@ export const listApprovedVendors = query({
   handler: async (ctx) => {
     const vendors = await ctx.db
       .query("vendors")
-      .filter((q) => q.eq(q.field("approved"), true))
-      .collect();
+      .withIndex("by_approved", (q) => q.eq("approved", true))
+      .take(100);
 
     const enriched = await Promise.all(
       vendors.map(async (vendor) => {
@@ -96,11 +94,8 @@ export const getApprovedVendorByOrganization = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("vendors")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("organizationId"), args.organizationId),
-          q.eq(q.field("approved"), true)
-        )
+      .withIndex("by_organizationId_and_approved", (q) =>
+        q.eq("organizationId", args.organizationId).eq("approved", true)
       )
       .first();
   },
@@ -110,7 +105,7 @@ export const listAllVendors = query({
   args: {},
 
   handler: async (ctx) => {
-    return await ctx.db.query("vendors").collect();
+    return await ctx.db.query("vendors").take(100);
   },
 });
 

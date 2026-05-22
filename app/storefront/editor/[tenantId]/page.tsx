@@ -1,20 +1,55 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Puck } from "@puckeditor/core";
-import { puckComponentConfigs } from "@/lib/puck/components";
+import { puckConfig } from "@/lib/puck/components";
 import type { Data } from "@puckeditor/core";
+import type { Id } from "@/convex/_generated/dataModel";
+import type { PuckComponentName, PuckComponentProps, StorefrontPuckData } from "@/lib/puck/types";
+
+const componentNames: PuckComponentName[] = [
+  "Header",
+  "Footer",
+  "HeroSection",
+  "ProductGrid",
+  "SocialProof",
+  "AccordionFAQ",
+  "ContactForm",
+  "ContentBlock",
+];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function normalizePuckContent(rawPuckData: unknown): StorefrontPuckData {
+  if (!Array.isArray(rawPuckData)) return [];
+
+  return rawPuckData.flatMap((block, index) => {
+    if (!isRecord(block) || typeof block.type !== "string") return [];
+    if (!componentNames.includes(block.type as PuckComponentName)) return [];
+
+    const props = isRecord(block.props) ? block.props : {};
+    return [{
+      type: block.type as PuckComponentName,
+      props: {
+        ...props,
+        id: typeof props.id === "string" ? props.id : `${block.type}-${index}`,
+      },
+    }];
+  }) as StorefrontPuckData;
+}
 
 export default function StorefrontEditorPage() {
   const params = useParams();
   const router = useRouter();
-  const tenantId = params.tenantId as string;
+  const tenantId = params.tenantId as Id<"tenants">;
 
   const storefrontData = useQuery(api.storefronts.getStorefrontByTenantId, {
-    tenantId: tenantId as any,
+    tenantId,
   });
   const updateDraft = useMutation(api.storefronts.updateDraftPuckData);
   const publishStorefront = useMutation(api.storefronts.publishStorefront);
@@ -23,12 +58,12 @@ export default function StorefrontEditorPage() {
   const [publishing, setPublishing] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
-  const handleChange = async (data: Data) => {
+  const handleChange = async (data: Data<PuckComponentProps>) => {
     setSaving(true);
     try {
       // Puck sends full Data { root, content }; store only content array
       // to stay compatible with StorefrontClient.tsx renderer
-      await updateDraft({ tenantId: tenantId as any, puckData: data.content });
+      await updateDraft({ tenantId, puckData: data.content });
       setLastSavedAt(new Date());
     } catch (err) {
       console.error("Failed to save draft:", err);
@@ -40,7 +75,7 @@ export default function StorefrontEditorPage() {
   const handlePublish = async () => {
     setPublishing(true);
     try {
-      await publishStorefront({ tenantId: tenantId as any });
+      await publishStorefront({ tenantId });
     } catch (err) {
       console.error("Failed to publish:", err);
     } finally {
@@ -76,10 +111,11 @@ export default function StorefrontEditorPage() {
   }
 
   const rawPuckData = storefrontData.storefront.puckData;
+  const puckContent = normalizePuckContent(rawPuckData);
 
-  const initialData: Data = {
+  const initialData: Data<PuckComponentProps> = {
     root: { props: {} },
-    content: Array.isArray(rawPuckData) ? rawPuckData : [],
+    content: puckContent,
   };
 
   const tenant = storefrontData.tenant!;
@@ -125,7 +161,7 @@ export default function StorefrontEditorPage() {
       {/* Puck editor */}
       <div className="flex-1 overflow-hidden">
         <Puck
-          config={puckComponentConfigs as any}
+          config={puckConfig}
           data={initialData}
           onChange={handleChange}
         />

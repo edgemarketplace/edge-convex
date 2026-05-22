@@ -3,6 +3,12 @@
 import { useQuery } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
+import type { Doc } from "../../convex/_generated/dataModel";
+
+type ApprovedVendor = Doc<"vendors"> & {
+  organizationSlug: string;
+  organizationName: string;
+};
 
 export default function MarketplacePage() {
   const vendors = useQuery(
@@ -22,7 +28,7 @@ export default function MarketplacePage() {
       </p>
 
       <div className="grid md:grid-cols-2 gap-5">
-        {vendors?.map((vendor: any) => (
+        {vendors?.map((vendor: ApprovedVendor) => (
           <div
             key={vendor._id}
             className="border rounded-2xl p-6"

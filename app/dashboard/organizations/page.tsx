@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import type { Doc } from "../../../convex/_generated/dataModel";
 
 export default function OrganizationsPage() {
   const { user } = useUser();
@@ -65,7 +66,7 @@ export default function OrganizationsPage() {
       </div>
 
       <div className="mt-10 space-y-4">
-        {organizations?.map((org: any) => (
+        {organizations?.map((org: Doc<"organizations">) => (
           <div key={org._id} className="border rounded-xl p-5">
             <h2 className="text-xl font-semibold">{org.name}</h2>
             <p className="text-gray-600">/{org.slug}</p>

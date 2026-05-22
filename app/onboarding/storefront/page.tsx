@@ -52,8 +52,9 @@ export default function StorefrontOnboardingPage() {
         metadata: { primaryGoal },
       });
       router.push(`/storefront/editor/${result.tenantId}`);
-    } catch (err: any) {
-      setError(err.message || "Failed to generate storefront");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to generate storefront";
+      setError(message);
     } finally {
       setLoading(false);
     }

@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../convex/_generated/dataModel";
 
 export default function VendorsPage() {
   const { user } = useUser();
@@ -122,7 +122,7 @@ export default function VendorsPage() {
             Select Organization
           </option>
 
-          {organizations?.map((org: any) => (
+          {organizations?.map((org: Doc<"organizations">) => (
             <option
               key={org._id}
               value={org._id}
@@ -192,7 +192,7 @@ export default function VendorsPage() {
         </h2>
 
         <div className="space-y-5">
-          {vendors?.map((vendor: any) => (
+          {vendors?.map((vendor: Doc<"vendors">) => (
             <div
               key={vendor._id}
               className="border rounded-xl p-5"

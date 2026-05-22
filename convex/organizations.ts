@@ -36,7 +36,7 @@ export const listByOwner = query({
     return await ctx.db
       .query("organizations")
       .withIndex("by_ownerId", (q) => q.eq("ownerId", args.ownerId))
-      .collect();
+      .take(100);
   },
 });
 

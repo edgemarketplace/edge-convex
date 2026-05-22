@@ -1,4 +1,6 @@
 import { blueprints, BLOCK_KEY_MAP } from "./registry";
+import type { StorefrontPuckData } from "../puck/types";
+import type { Vertical } from "./registry";
 
 export type BusinessMetadata = {
   businessName: string;
@@ -6,10 +8,7 @@ export type BusinessMetadata = {
   variationMode: string;
 };
 
-type PuckComponent = {
-  type: string;
-  props: Record<string, any>;
-};
+type PuckComponent = StorefrontPuckData[number];
 
 /**
  * Compile a deterministic storefront blueprint into Puck-compatible component array
@@ -20,7 +19,7 @@ export function compileStorefrontBlueprint({
   variation,
   metadata,
 }: {
-  vertical: keyof typeof blueprints;
+  vertical: Vertical;
   variation: string;
   metadata: BusinessMetadata;
 }): PuckComponent[] {
@@ -36,6 +35,7 @@ export function compileStorefrontBlueprint({
   components.push({
     type: "Header",
     props: {
+      id: "header",
       businessName: metadata.businessName,
       vertical: metadata.vertical,
     },
@@ -46,7 +46,8 @@ export function compileStorefrontBlueprint({
     const componentType = BLOCK_KEY_MAP[key];
     if (!componentType) return;
 
-    const baseProps: Record<string, any> = {
+    const baseProps: Record<string, string | number | boolean> = {
+      id: `${componentType}-${components.length}`,
       businessName: metadata.businessName,
     };
 
@@ -78,13 +79,14 @@ export function compileStorefrontBlueprint({
     components.push({
       type: componentType,
       props: baseProps,
-    });
+    } as PuckComponent);
   });
 
   // 3. Add global Footer
   components.push({
     type: "Footer",
     props: {
+      id: "footer",
       businessName: metadata.businessName,
       year: new Date().getFullYear(),
     },

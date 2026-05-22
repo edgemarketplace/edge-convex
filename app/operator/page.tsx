@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import type { Doc } from "../../convex/_generated/dataModel";
 
 export default function OperatorPage() {
   const vendors = useQuery(api.vendors.listAllVendors);
@@ -20,7 +21,7 @@ export default function OperatorPage() {
       </p>
 
       <div className="space-y-5">
-        {vendors?.map((vendor: any) => (
+        {vendors?.map((vendor: Doc<"vendors">) => (
           <div key={vendor._id} className="border rounded-xl p-5">
             <div className="flex items-start justify-between gap-6">
               <div>

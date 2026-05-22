@@ -22,7 +22,7 @@ export const createUser = mutation({
     return await ctx.db.insert("users", {
       clerkId: args.clerkId,
       email: args.email,
-      name: args.name,
+      ...(args.name ? { name: args.name } : {}),
       role: "vendor",
       createdAt: Date.now(),
     });

@@ -5,7 +5,7 @@ export type HeaderProps = {
   vertical?: string;
 };
 
-export const Header = ({ businessName, vertical }: HeaderProps) => {
+export const Header = ({ businessName }: HeaderProps) => {
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">

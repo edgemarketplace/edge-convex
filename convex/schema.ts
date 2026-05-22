@@ -31,7 +31,9 @@ export default defineSchema({
     contactEmail: v.optional(v.string()),
     approved: v.boolean(),
     createdAt: v.number(),
-  }),
+  }).index("by_organizationId", ["organizationId"])
+    .index("by_approved", ["approved"])
+    .index("by_organizationId_and_approved", ["organizationId", "approved"]),
 
   rfqs: defineTable({
     organizationId: v.id("organizations"),
@@ -51,7 +53,7 @@ export default defineSchema({
     ),
 
     createdAt: v.number(),
-  }),
+  }).index("by_organizationId", ["organizationId"]),
 
   rfqResponses: defineTable({
     rfqId: v.id("rfqs"),
