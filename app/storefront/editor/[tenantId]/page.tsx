@@ -101,11 +101,21 @@ export default function StorefrontEditorPage() {
   };
 
   const handlePublish = async () => {
+    console.log("Publish clicked, tenantId:", tenantId);
+    if (!tenantId) {
+      console.error("Cannot publish: tenantId is undefined!");
+      alert("Error: tenantId is missing. Check the URL.");
+      setPublishing(false);
+      return;
+    }
     setPublishing(true);
     try {
-      await publishStorefront({ tenantId });
+      const result = await publishStorefront({ tenantId });
+      console.log("Publish succeeded, version:", result);
+      alert("Published successfully! Version: " + result);
     } catch (err) {
       console.error("Failed to publish:", err);
+      alert("Publish failed: " + (err as Error).message);
     } finally {
       setPublishing(false);
     }
