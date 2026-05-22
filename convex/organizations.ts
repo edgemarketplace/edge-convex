@@ -35,9 +35,7 @@ export const listByOwner = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("organizations")
-      .filter((q) =>
-        q.eq(q.field("ownerId"), args.ownerId)
-      )
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", args.ownerId))
       .collect();
   },
 });
@@ -50,9 +48,7 @@ export const getBySlug = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("organizations")
-      .filter((q) =>
-        q.eq(q.field("slug"), args.slug)
-      )
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .first();
   },
 });

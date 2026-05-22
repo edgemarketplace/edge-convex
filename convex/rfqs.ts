@@ -88,7 +88,7 @@ export const listRFQResponses = query({
   handler: async (ctx, args) => {
     const responses = await ctx.db
       .query("rfqResponses")
-      .filter((q) => q.eq(q.field("rfqId"), args.rfqId))
+      .withIndex("by_rfqId", (q) => q.eq("rfqId", args.rfqId))
       .order("desc")
       .collect();
 

@@ -19,7 +19,8 @@ export default defineSchema({
     slug: v.string(),
     ownerId: v.optional(v.id("users")),
     createdAt: v.number(),
-  }),
+  }).index("by_ownerId", ["ownerId"])
+    .index("by_slug", ["slug"]),
 
   vendors: defineTable({
     organizationId: v.optional(v.id("organizations")),
@@ -62,7 +63,7 @@ export default defineSchema({
     proposedBudget: v.optional(v.string()),
 
     createdAt: v.number(),
-  }),
+  }).index("by_rfqId", ["rfqId"]),
 
   sites: defineTable({
     organizationId: v.optional(v.id("organizations")),
