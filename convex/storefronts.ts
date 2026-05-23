@@ -197,3 +197,23 @@ export const createStorefrontFromBlueprint = action({
     return { tenantId, storefrontId };
   },
 });
+
+// Debug function to list tenants and their storefronts
+export const debugListTenants = query({
+  args: {},
+  handler: async (ctx) => {
+    const tenants = await ctx.db.query("tenants").take(5);
+    return Promise.all(tenants.map(async (t) => {
+      const storefront = await ctx.db.query("storefronts")
+        .withIndex("by_tenant", (q) => q.eq("tenantId", t._id))
+        .unique();
+      return {
+        tenantId: t._id,
+        businessName: t.businessName,
+        storefrontId: storefront?._id,
+        hasPuckData: !!storefront?.puckData,
+        publishedVersion: storefront?.publishedVersion,
+      };
+    }));
+  },
+});
