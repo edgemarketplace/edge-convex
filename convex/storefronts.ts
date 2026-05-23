@@ -57,6 +57,32 @@ function assertTenantOwner(tenantOwnerUserId: Id<"users">, viewerUserId: Id<"use
   }
 }
 
+function readStoredPuckArray(value: unknown) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (
+    value !== null &&
+    typeof value === "object" &&
+    "content" in value &&
+    Array.isArray((value as { content?: unknown }).content)
+  ) {
+    return (value as { content: unknown[] }).content;
+  }
+
+  return [];
+}
+
+function getDraftPuckData(
+  storefront: {
+    draftPuckData?: unknown;
+    puckData?: unknown;
+  },
+) {
+  return readStoredPuckArray(storefront.draftPuckData ?? storefront.puckData);
+}
+
 function normalizeMetadata(args: {
   businessName: string;
   vertical: string;
@@ -146,7 +172,7 @@ export const getStorefrontByTenantSlug = query({
       },
       storefront: {
         blueprintVersion: storefront.blueprintVersion,
-        publishedPuckData: storefront.publishedPuckData ?? [],
+        publishedPuckData: readStoredPuckArray(storefront.publishedPuckData),
         publishedVersion: storefront.publishedVersion ?? null,
         lastPublishedAt: storefront.lastPublishedAt ?? null,
         themeTokens: storefront.themeTokens,
@@ -180,11 +206,12 @@ export const updateDraftPuckData = mutation({
 
     assertTenantOwner(tenant.ownerUserId, viewerUserId);
 
-    const draftPuckData = Array.isArray(args.puckData) ? args.puckData : [];
+    const draftPuckData = readStoredPuckArray(args.puckData);
     const draftVersion = storefront.draftVersion + 1;
 
     await ctx.db.patch(storefront._id, {
       draftPuckData,
+      puckData: draftPuckData,
       draftVersion,
     });
 
@@ -213,9 +240,7 @@ export const publishStorefront = mutation({
 
     assertTenantOwner(tenant.ownerUserId, viewerUserId);
 
-    const draftPuckData = Array.isArray(storefront.draftPuckData)
-      ? storefront.draftPuckData
-      : [];
+    const draftPuckData = getDraftPuckData(storefront);
 
     if (draftPuckData.length === 0) {
       throw new Error("No draft storefront data to publish");
@@ -225,6 +250,7 @@ export const publishStorefront = mutation({
 
     await ctx.db.patch(storefront._id, {
       publishedPuckData: draftPuckData,
+      puckData: draftPuckData,
       publishedVersion,
       lastPublishedAt: Date.now(),
       publishedBy: viewerUserId,
@@ -282,6 +308,7 @@ export const createStorefront = internalMutation({
       tenantId: args.tenantId,
       blueprintVersion: args.blueprintVersion,
       draftPuckData: args.draftPuckData,
+      puckData: args.draftPuckData,
       publishedPuckData: undefined,
       themeTokens: args.themeTokens,
       draftVersion: 1,

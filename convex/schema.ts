@@ -74,7 +74,8 @@ export default defineSchema({
   storefronts: defineTable({
     tenantId: v.id("tenants"),
     blueprintVersion: v.string(),
-    draftPuckData: v.any(),
+    draftPuckData: v.optional(v.any()),
+    puckData: v.optional(v.any()),
     publishedPuckData: v.optional(v.any()),
     themeTokens: v.any(),
     draftVersion: v.number(),
