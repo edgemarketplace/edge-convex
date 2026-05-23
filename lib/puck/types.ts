@@ -33,5 +33,6 @@ export type PuckComponentProps = {
 
 export type StorefrontPuckConfig = Config<PuckComponentProps>;
 export type PuckConfigMap = StorefrontPuckConfig["components"];
-export type StorefrontPuckData = Data<PuckComponentProps>["content"];
+export type StorefrontEditorData = Data<PuckComponentProps>;
+export type StorefrontPuckData = StorefrontEditorData["content"];
 export type StorefrontBlock = StorefrontPuckData[number];

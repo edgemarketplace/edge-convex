@@ -2,18 +2,23 @@ import { ComponentConfig } from "@puckeditor/core";
 
 export type HeaderProps = {
   businessName?: string;
-  vertical?: string;
+  announcement?: string;
+  id?: string;
 };
 
-export const Header = ({ businessName }: HeaderProps) => {
+export const Header = ({ businessName, announcement }: HeaderProps) => {
   return (
-    <header className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">{businessName || "Storefront"}</h1>
-        <nav>
-          <a href="#" className="text-gray-600 hover:text-gray-900 mr-4">Home</a>
-          <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
-        </nav>
+    <header className="border-b border-gray-200 bg-white">
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-600">
+            Edge Marketplace
+          </p>
+          <h1 className="text-xl font-semibold text-gray-950">
+            {businessName || "Your business"}
+          </h1>
+        </div>
+        <div className="text-sm text-gray-600">{announcement || "Deterministic storefront blueprint"}</div>
       </div>
     </header>
   );
@@ -23,10 +28,10 @@ export const headerConfig: ComponentConfig<HeaderProps> = {
   render: Header,
   fields: {
     businessName: { type: "text" },
-    vertical: { type: "text" },
+    announcement: { type: "text" },
   },
   defaultProps: {
-    businessName: "Your Business",
-    vertical: "retail",
+    businessName: "Your business",
+    announcement: "Deterministic storefront blueprint",
   },
 };

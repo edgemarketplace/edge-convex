@@ -6,11 +6,7 @@ export default defineSchema({
     clerkId: v.string(),
     email: v.string(),
     name: v.optional(v.string()),
-    role: v.union(
-      v.literal("buyer"),
-      v.literal("vendor"),
-      v.literal("admin")
-    ),
+    role: v.union(v.literal("buyer"), v.literal("vendor"), v.literal("admin")),
     createdAt: v.number(),
   }).index("by_clerkId", ["clerkId"]),
 
@@ -19,7 +15,8 @@ export default defineSchema({
     slug: v.string(),
     ownerId: v.optional(v.id("users")),
     createdAt: v.number(),
-  }).index("by_ownerId", ["ownerId"])
+  })
+    .index("by_ownerId", ["ownerId"])
     .index("by_slug", ["slug"]),
 
   vendors: defineTable({
@@ -31,39 +28,26 @@ export default defineSchema({
     contactEmail: v.optional(v.string()),
     approved: v.boolean(),
     createdAt: v.number(),
-  }).index("by_organizationId", ["organizationId"])
+  })
+    .index("by_organizationId", ["organizationId"])
     .index("by_approved", ["approved"])
     .index("by_organizationId_and_approved", ["organizationId", "approved"]),
 
   rfqs: defineTable({
     organizationId: v.id("organizations"),
-
     title: v.string(),
-
     category: v.string(),
-
     description: v.string(),
-
     budget: v.optional(v.string()),
-
-    status: v.union(
-      v.literal("open"),
-      v.literal("in_review"),
-      v.literal("closed")
-    ),
-
+    status: v.union(v.literal("open"), v.literal("in_review"), v.literal("closed")),
     createdAt: v.number(),
   }).index("by_organizationId", ["organizationId"]),
 
   rfqResponses: defineTable({
     rfqId: v.id("rfqs"),
-
     organizationId: v.id("organizations"),
-
     message: v.string(),
-
     proposedBudget: v.optional(v.string()),
-
     createdAt: v.number(),
   }).index("by_rfqId", ["rfqId"]),
 
@@ -81,17 +65,22 @@ export default defineSchema({
     slug: v.string(),
     vertical: v.string(),
     variationMode: v.string(),
-    status: v.string(),
+    status: v.union(v.literal("draft"), v.literal("active"), v.literal("archived")),
     createdAt: v.number(),
-  }).index("by_slug", ["slug"])
+  })
+    .index("by_slug", ["slug"])
     .index("by_owner", ["ownerUserId"]),
 
   storefronts: defineTable({
     tenantId: v.id("tenants"),
     blueprintVersion: v.string(),
-    puckData: v.any(),
+    draftPuckData: v.any(),
+    publishedPuckData: v.optional(v.any()),
     themeTokens: v.any(),
+    draftVersion: v.number(),
     publishedVersion: v.optional(v.number()),
-    draftVersion: v.optional(v.number()),
+    lastPublishedAt: v.optional(v.number()),
+    publishedBy: v.optional(v.id("users")),
+    medusaCollectionId: v.optional(v.string()),
   }).index("by_tenant", ["tenantId"]),
 });

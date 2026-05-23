@@ -1,96 +1,171 @@
-import { blueprints, BLOCK_KEY_MAP } from "./registry";
 import type { StorefrontPuckData } from "../puck/types";
-import type { Vertical } from "./registry";
+import { DEFAULT_MEDUSA_COLLECTION_ID } from "../medusa/config";
+import {
+  blueprints,
+  defaultThemeTokens,
+  type BusinessMetadata,
+  type BlockCode,
+  type VariationMode,
+  type Vertical,
+} from "./registry";
 
-export type BusinessMetadata = {
-  businessName: string;
-  vertical: string;
-  variationMode: string;
-};
+export interface CompileStorefrontBlueprintInput {
+  vertical: Vertical;
+  variation: VariationMode;
+  metadata: BusinessMetadata;
+}
 
-type PuckComponent = StorefrontPuckData[number];
+export interface CompiledStorefrontBlueprint {
+  blueprintVersion: string;
+  puckData: StorefrontPuckData;
+  themeTokens: typeof defaultThemeTokens;
+}
 
-/**
- * Compile a deterministic storefront blueprint into Puck-compatible component array
- * Follows Phase 3 spec: pure function, returns valid Puck JSON
- */
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
+
+function makeId(type: string, index: number) {
+  const normalized = type.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase();
+  return `${normalized}-${index + 1}`;
+}
+
+function makeHeader(metadata: BusinessMetadata) {
+  return {
+    type: "Header" as const,
+    props: {
+      id: "header",
+      businessName: metadata.businessName,
+      announcement: metadata.locationLabel ?? "Built for modern multi-tenant commerce",
+    },
+  };
+}
+
+function makeFooter(metadata: BusinessMetadata) {
+  return {
+    type: "Footer" as const,
+    props: {
+      id: "footer",
+      businessName: metadata.businessName,
+      tagline: metadata.description ?? "Powered by a deterministic storefront blueprint.",
+    },
+  };
+}
+
+function blockFromCode(
+  blockCode: BlockCode,
+  metadata: BusinessMetadata,
+  index: number,
+): StorefrontPuckData[number] {
+  switch (blockCode) {
+    case "H":
+      return {
+        type: "HeroSection",
+        props: {
+          id: makeId("hero-section", index),
+          headline: `Launch ${metadata.businessName} with confidence`,
+          subheadline:
+            metadata.description ??
+            "A generated storefront foundation that keeps layout deterministic while commerce stays in Medusa.",
+          ctaLabel:
+            metadata.primaryGoal === "services"
+              ? "Book a consultation"
+              : metadata.primaryGoal === "content"
+                ? "Explore the catalog"
+                : "Browse featured products",
+          ctaHref: "#products",
+        },
+      };
+    case "O":
+      return {
+        type: "ProductGrid",
+        props: {
+          id: makeId("product-grid", index),
+          headline: metadata.primaryGoal === "services" ? "Featured offers" : "Featured products",
+          source: "medusa",
+          collectionId: metadata.medusaCollectionId ?? DEFAULT_MEDUSA_COLLECTION_ID,
+          itemsPerView: 8,
+          filterCategories: true,
+          emptyStateMessage: "Products will appear here once this storefront is connected to a Medusa collection.",
+        },
+      };
+    case "P":
+      return {
+        type: "SocialProof",
+        props: {
+          id: makeId("social-proof", index),
+          headline: `Why teams choose ${metadata.businessName}`,
+          subheadline: "Reusable blueprint defaults tuned for conversion, trust, and clarity.",
+        },
+      };
+    case "C":
+      return {
+        type: "ContentBlock",
+        props: {
+          id: makeId("content-block", index),
+          headline: `About ${metadata.businessName}`,
+          body:
+            metadata.description ??
+            "Tell buyers what makes this offer credible, differentiated, and easy to buy from.",
+        },
+      };
+    case "A":
+      return {
+        type: "ContactForm",
+        props: {
+          id: makeId("contact-form", index),
+          headline: "Talk to the team",
+          description: "Collect inbound leads without overbuilding CRM logic in the MVP.",
+          submitLabel: "Send inquiry",
+        },
+      };
+    case "F":
+      return {
+        type: "AccordionFAQ",
+        props: {
+          id: makeId("accordion-faq", index),
+          headline: "Frequently asked questions",
+        },
+      };
+  }
+}
+
 export function compileStorefrontBlueprint({
   vertical,
   variation,
   metadata,
-}: {
-  vertical: Vertical;
-  variation: string;
-  metadata: BusinessMetadata;
-}): PuckComponent[] {
-  // Get block keys for this vertical + variation
-  const blueprint = blueprints[vertical];
-  if (!blueprint) throw new Error(`Unsupported vertical: ${vertical}`);
-  const blockKeys = blueprint[variation as keyof typeof blueprint];
-  if (!blockKeys) throw new Error(`Unsupported variation: ${variation} for vertical: ${vertical}`);
+}: CompileStorefrontBlueprintInput): CompiledStorefrontBlueprint {
+  const verticalBlueprints = blueprints[vertical] ?? blueprints.retail;
+  const sequence = verticalBlueprints[variation] ?? verticalBlueprints.seller;
 
-  const components: PuckComponent[] = [];
+  const puckData: StorefrontPuckData = [
+    makeHeader(metadata),
+    ...sequence.map((blockCode, index) => blockFromCode(blockCode, metadata, index)),
+    makeFooter(metadata),
+  ];
 
-  // 1. Add global Header
-  components.push({
-    type: "Header",
-    props: {
-      id: "header",
-      businessName: metadata.businessName,
-      vertical: metadata.vertical,
+  return {
+    blueprintVersion: `${vertical}-${variation}-v1`,
+    puckData,
+    themeTokens: {
+      ...defaultThemeTokens,
+      color: {
+        ...defaultThemeTokens.color,
+        accent:
+          vertical === "services"
+            ? "#7c3aed"
+            : vertical === "content"
+              ? "#0f766e"
+              : defaultThemeTokens.color.accent,
+      },
     },
-  });
+  };
+}
 
-  // 2. Add dynamic blocks from blueprint
-  blockKeys.forEach((key) => {
-    const componentType = BLOCK_KEY_MAP[key];
-    if (!componentType) return;
-
-    const baseProps: Record<string, string | number | boolean> = {
-      id: `${componentType}-${components.length}`,
-      businessName: metadata.businessName,
-    };
-
-    // Add opinionated default props per component type
-    switch (componentType) {
-      case "HeroSection":
-        baseProps.headline = `Welcome to ${metadata.businessName}`;
-        baseProps.subheadline = `Your trusted ${metadata.vertical} partner`;
-        break;
-      case "ProductGrid":
-        baseProps.source = "medusa";
-        baseProps.itemsPerView = 8;
-        baseProps.filterCategories = true;
-        break;
-      case "SocialProof":
-        baseProps.headline = "What our customers say";
-        break;
-      case "AccordionFAQ":
-        baseProps.headline = "Frequently Asked Questions";
-        break;
-      case "ContactForm":
-        baseProps.headline = "Get in Touch";
-        break;
-      case "ContentBlock":
-        baseProps.content = `Learn more about ${metadata.businessName}`;
-        break;
-    }
-
-    components.push({
-      type: componentType,
-      props: baseProps,
-    } as PuckComponent);
-  });
-
-  // 3. Add global Footer
-  components.push({
-    type: "Footer",
-    props: {
-      id: "footer",
-      businessName: metadata.businessName,
-      year: new Date().getFullYear(),
-    },
-  });
-
-  return components;
+export function defaultTenantSlug(businessName: string) {
+  return slugify(businessName);
 }

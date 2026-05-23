@@ -1,46 +1,64 @@
-// Blueprint registry: hard-coded first, database later
-import type { PuckComponentName } from "../puck/types";
+export type BlockCode = "H" | "O" | "P" | "C" | "A" | "F";
 
-export type Vertical = "retail" | "pro";
-export type VariationMode = "seller" | "pro" | "storyteller" | "minimalist" | "converter" | "local";
+export type Vertical = "retail" | "services" | "content";
 
-// Block type keys matching Phase 2 definitions
-type BlockKey = "H" | "O" | "P" | "F" | "A" | "C";
+export type VariationMode =
+  | "seller"
+  | "pro"
+  | "storyteller"
+  | "minimalist"
+  | "converter"
+  | "local";
 
-export type BusinessMetadata = {
+export type PrimaryGoal = "products" | "services" | "bookings" | "content";
+
+export interface BusinessMetadata {
   businessName: string;
-  vertical: string;
-  variationMode: string;
-};
+  vertical: Vertical;
+  variationMode: VariationMode;
+  primaryGoal?: PrimaryGoal;
+  description?: string;
+  contactEmail?: string;
+  locationLabel?: string;
+  medusaCollectionId?: string;
+}
 
-// Blueprint definition: array of block keys in order
-type BlueprintDefinition = Record<VariationMode, BlockKey[]>;
-
-export const blueprints: Record<Vertical, BlueprintDefinition> = {
+export const blueprints: Record<Vertical, Record<VariationMode, BlockCode[]>> = {
   retail: {
     seller: ["H", "O", "P", "F", "A"],
     pro: ["H", "O", "O", "P", "A"],
-    storyteller: ["H", "C", "P", "F", "A"],
+    storyteller: ["H", "C", "O", "P", "F", "A"],
     minimalist: ["H", "O", "A"],
-    converter: ["H", "O", "P", "A"],
-    local: ["H", "O", "P", "F", "A"],
+    converter: ["H", "O", "P", "O", "A"],
+    local: ["H", "C", "P", "A"],
   },
-  pro: {
-    seller: ["H", "O", "P", "F", "A"],
-    pro: ["H", "O", "O", "P", "A"],
-    storyteller: ["H", "C", "P", "F", "A"],
-    minimalist: ["H", "O", "A"],
-    converter: ["H", "O", "P", "A"],
-    local: ["H", "O", "P", "F", "A"],
+  services: {
+    seller: ["H", "C", "P", "A"],
+    pro: ["H", "C", "P", "F", "A"],
+    storyteller: ["H", "C", "C", "P", "A"],
+    minimalist: ["H", "C", "A"],
+    converter: ["H", "P", "C", "A"],
+    local: ["H", "C", "P", "F", "A"],
+  },
+  content: {
+    seller: ["H", "C", "P", "A"],
+    pro: ["H", "C", "C", "P", "A"],
+    storyteller: ["H", "C", "C", "P", "F", "A"],
+    minimalist: ["H", "C", "A"],
+    converter: ["H", "C", "P", "A"],
+    local: ["H", "C", "P", "A"],
   },
 };
 
-// Map block keys to Puck component types
-export const BLOCK_KEY_MAP: Record<BlockKey, PuckComponentName> = {
-  H: "HeroSection",
-  O: "ProductGrid",
-  P: "SocialProof",
-  F: "AccordionFAQ",
-  A: "ContactForm",
-  C: "ContentBlock",
+export const defaultThemeTokens = {
+  color: {
+    brand: "#111827",
+    accent: "#2563eb",
+    surface: "#ffffff",
+    muted: "#f3f4f6",
+  },
+  radius: {
+    card: "1rem",
+    button: "9999px",
+  },
 };

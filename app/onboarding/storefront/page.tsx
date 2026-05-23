@@ -1,188 +1,250 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAction } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
-import { useRouter } from "next/navigation";
+import type { PrimaryGoal, VariationMode, Vertical } from "@/lib/blueprints/registry";
 
 type OnboardingStep = 1 | 2 | 3;
+
+const verticalOptions: Array<{ value: Vertical; label: string; description: string }> = [
+  { value: "retail", label: "Retail", description: "Merchandise, catalogs, and direct commerce." },
+  { value: "services", label: "Services", description: "Consulting, B2B offers, and procurement." },
+  { value: "content", label: "Content", description: "Publishing-led storefronts and media catalogs." },
+];
+
+const primaryGoalOptions: Array<{ value: PrimaryGoal; label: string }> = [
+  { value: "products", label: "Products" },
+  { value: "services", label: "Services" },
+  { value: "bookings", label: "Bookings" },
+  { value: "content", label: "Content" },
+];
+
+const variationOptions: Array<{ value: VariationMode; label: string; description: string }> = [
+  { value: "seller", label: "Seller", description: "Strong hero, featured products, trust, FAQ, contact." },
+  { value: "pro", label: "Pro", description: "More commerce-heavy layout for catalog-first storefronts." },
+  { value: "storyteller", label: "Storyteller", description: "More narrative content before the transaction layer." },
+  { value: "minimalist", label: "Minimalist", description: "Smallest useful launch footprint." },
+  { value: "converter", label: "Converter", description: "Push visitors toward a clear commercial next step." },
+  { value: "local", label: "Local", description: "Best for geo-aware, operator-supported businesses." },
+];
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
 
 export default function StorefrontOnboardingPage() {
   const [step, setStep] = useState<OnboardingStep>(1);
   const [businessName, setBusinessName] = useState("");
-  const [vertical, setVertical] = useState("retail");
-  const [primaryGoal, setPrimaryGoal] = useState("products");
-  const [variationMode, setVariationMode] = useState("seller");
+  const [vertical, setVertical] = useState<Vertical>("retail");
+  const [primaryGoal, setPrimaryGoal] = useState<PrimaryGoal>("products");
+  const [variationMode, setVariationMode] = useState<VariationMode>("seller");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { user } = useUser();
   const router = useRouter();
+  const { user } = useUser();
   const createStorefront = useAction(api.storefronts.createStorefrontFromBlueprint);
 
-  const handleStep1Next = () => {
-    if (!businessName.trim()) {
-      setError("Business name is required");
-      return;
-    }
-    setError("");
-    setStep(2);
-  };
-
-  const handleStep2Next = () => {
-    setError("");
-    setStep(3);
-  };
-
-  const handleGenerate = async () => {
+  async function handleGenerate() {
     if (!user) {
-      setError("You must be logged in");
+      setError("You must be signed in to generate a storefront.");
       return;
     }
+
     setLoading(true);
     setError("");
+
     try {
       const result = await createStorefront({
-        ownerUserId: user.id,
         businessName,
-        slug: businessName.toLowerCase().replace(/\s+/g, "-"),
+        slug: slugify(businessName),
         vertical,
         variationMode,
-        metadata: { primaryGoal },
+        metadata: {
+          primaryGoal,
+          description,
+        },
       });
+
       router.push(`/storefront/editor/${result.tenantId}`);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to generate storefront";
-      setError(message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate storefront.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Create Your Storefront</h1>
+    <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mb-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-blue-600">Storefront onboarding</p>
+        <h1 className="mt-2 text-4xl font-semibold text-gray-950">Generate a multi-tenant storefront draft</h1>
+        <p className="mt-3 text-lg text-gray-600">
+          Start with deterministic blueprint compilation. Layer commerce and fulfillment behind it later.
+        </p>
+      </div>
 
-      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
+      {error ? <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
 
-      {/* Step 1: Business Info */}
-      {step === 1 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Step 1: Business Details</h2>
+      <div className="mb-8 flex gap-3 text-sm text-gray-500">
+        {[1, 2, 3].map((index) => (
+          <div
+            key={index}
+            className={`rounded-full px-3 py-1 ${step === index ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-500"}`}
+          >
+            Step {index}
+          </div>
+        ))}
+      </div>
+
+      {step === 1 ? (
+        <div className="space-y-6 rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
           <div>
-            <label htmlFor="business-name" className="block mb-1">Business Name</label>
+            <label htmlFor="business-name" className="mb-2 block text-sm font-medium text-gray-700">Business name</label>
             <input
               id="business-name"
               name="businessName"
               autoComplete="organization"
-              type="text"
               value={businessName}
-              onChange={(e) => setBusinessName(e.target.value)}
-              className="w-full border p-2 rounded"
-              placeholder="Acme Retail"
+              onChange={(event) => setBusinessName(event.target.value)}
+              className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+              placeholder="Edge Procurement Supply"
             />
           </div>
+
           <div>
-            <label htmlFor="vertical" className="block mb-1">Vertical</label>
-            <select
-              id="vertical"
-              name="vertical"
+            <label htmlFor="description" className="mb-2 block text-sm font-medium text-gray-700">Positioning</label>
+            <textarea
+              id="description"
+              name="description"
               autoComplete="off"
-              value={vertical}
-              onChange={(e) => setVertical(e.target.value)}
-              className="w-full border p-2 rounded"
-            >
-              <option value="retail">Retail</option>
-              <option value="pro">Professional Services</option>
-            </select>
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              className="min-h-28 w-full rounded-2xl border border-gray-300 px-4 py-3"
+              placeholder="What do you sell, and why should buyers trust this storefront?"
+            />
           </div>
+
           <div>
-            <label htmlFor="primary-goal" className="block mb-1">Primary Goal</label>
+            <p className="mb-3 text-sm font-medium text-gray-700">Vertical</p>
+            <div className="grid gap-3 md:grid-cols-3">
+              {verticalOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setVertical(option.value)}
+                  className={`rounded-2xl border p-4 text-left ${vertical === option.value ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"}`}
+                >
+                  <div className="font-medium text-gray-950">{option.label}</div>
+                  <div className="mt-2 text-sm text-gray-600">{option.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="primary-goal" className="mb-2 block text-sm font-medium text-gray-700">Primary goal</label>
             <select
               id="primary-goal"
               name="primaryGoal"
               autoComplete="off"
               value={primaryGoal}
-              onChange={(e) => setPrimaryGoal(e.target.value)}
-              className="w-full border p-2 rounded"
+              onChange={(event) => setPrimaryGoal(event.target.value as PrimaryGoal)}
+              className="w-full rounded-2xl border border-gray-300 px-4 py-3"
             >
-              <option value="products">Sell Products</option>
-              <option value="services">Offer Services</option>
-              <option value="bookings">Take Bookings</option>
-              <option value="content">Share Content</option>
+              {primaryGoalOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
           </div>
+
           <button
-            onClick={handleStep1Next}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            type="button"
+            onClick={() => {
+              if (!businessName.trim()) {
+                setError("Business name is required.");
+                return;
+              }
+              setError("");
+              setStep(2);
+            }}
+            className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            Next
+            Continue
           </button>
         </div>
-      )}
+      ) : null}
 
-      {/* Step 2: Variation Mode */}
-      {step === 2 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Step 2: Choose Layout Style</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {["seller", "pro", "storyteller", "minimalist", "converter", "local"].map((mode) => (
+      {step === 2 ? (
+        <div className="space-y-6 rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-950">Choose a variation mode</h2>
+            <p className="mt-2 text-sm text-gray-600">These are deterministic layout patterns, not AI-generated randomness.</p>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            {variationOptions.map((option) => (
               <button
-                key={mode}
-                onClick={() => setVariationMode(mode)}
-                className={`p-4 border rounded capitalize ${
-                  variationMode === mode ? "border-blue-600 bg-blue-50" : "border-gray-300"
-                }`}
+                key={option.value}
+                type="button"
+                onClick={() => setVariationMode(option.value)}
+                className={`rounded-2xl border p-4 text-left ${variationMode === option.value ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"}`}
               >
-                {mode}
+                <div className="font-medium capitalize text-gray-950">{option.label}</div>
+                <div className="mt-2 text-sm text-gray-600">{option.description}</div>
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setStep(1)}
-              className="border px-4 py-2 rounded hover:bg-gray-50"
-            >
-              Back
-            </button>
-            <button
-              onClick={handleStep2Next}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* Step 3: Generate */}
-      {step === 3 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Step 3: Generate Storefront</h2>
-          <div className="bg-gray-50 p-4 rounded">
-            <p><strong>Business Name:</strong> {businessName}</p>
-            <p><strong>Vertical:</strong> {vertical}</p>
-            <p><strong>Primary Goal:</strong> {primaryGoal}</p>
-            <p><strong>Layout Style:</strong> {variationMode}</p>
+          <div className="flex gap-3">
+            <button type="button" onClick={() => setStep(1)} className="rounded-full border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">Back</button>
+            <button type="button" onClick={() => setStep(3)} className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">Review</button>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setStep(2)}
-              className="border px-4 py-2 rounded hover:bg-gray-50"
-            >
-              Back
-            </button>
-            <button
-              onClick={handleGenerate}
-              disabled={loading}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
-            >
-              {loading ? "Generating..." : "Generate Storefront"}
+        </div>
+      ) : null}
+
+      {step === 3 ? (
+        <div className="space-y-6 rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-950">Generate the draft storefront</h2>
+            <p className="mt-2 text-sm text-gray-600">This creates the tenant, compiles the blueprint, and saves draft Puck data in Convex.</p>
+          </div>
+
+          <dl className="grid gap-4 rounded-2xl bg-gray-50 p-6 md:grid-cols-2">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Business</dt>
+              <dd className="mt-1 text-sm text-gray-900">{businessName}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Vertical</dt>
+              <dd className="mt-1 text-sm text-gray-900">{vertical}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Goal</dt>
+              <dd className="mt-1 text-sm text-gray-900">{primaryGoal}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Variation</dt>
+              <dd className="mt-1 text-sm text-gray-900">{variationMode}</dd>
+            </div>
+          </dl>
+
+          <div className="flex gap-3">
+            <button type="button" onClick={() => setStep(2)} className="rounded-full border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">Back</button>
+            <button type="button" disabled={loading} onClick={() => void handleGenerate()} className="rounded-full bg-green-600 px-5 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60">
+              {loading ? "Generating..." : "Generate storefront"}
             </button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

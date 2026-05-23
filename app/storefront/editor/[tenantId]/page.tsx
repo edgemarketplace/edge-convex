@@ -1,51 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import type { JSX } from "react";
+import { useParams } from "next/navigation";
+import { useMutation, useQuery } from "convex/react";
 import { Puck } from "@puckeditor/core";
-import { puckConfig } from "@/lib/puck/components";
-import type { Data } from "@puckeditor/core";
+import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import type { PuckComponentName, PuckComponentProps, StorefrontPuckData } from "@/lib/puck/types";
+import { puckConfig } from "@/lib/puck/components";
+import { toPuckEditorData } from "@/lib/puck/data";
+import type { StorefrontEditorData } from "@/lib/puck/types";
 
-const componentNames: PuckComponentName[] = [
-  "Header",
-  "Footer",
-  "HeroSection",
-  "ProductGrid",
-  "SocialProof",
-  "AccordionFAQ",
-  "ContactForm",
-  "ContentBlock",
-];
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function normalizePuckContent(rawPuckData: unknown): StorefrontPuckData {
-  if (!Array.isArray(rawPuckData)) return [];
-
-  return rawPuckData.flatMap((block, index) => {
-    if (!isRecord(block) || typeof block.type !== "string") return [];
-    if (!componentNames.includes(block.type as PuckComponentName)) return [];
-
-    const props = isRecord(block.props) ? block.props : {};
-    return [{
-      type: block.type as PuckComponentName,
-      props: {
-        ...props,
-        id: typeof props.id === "string" ? props.id : `${block.type}-${index}`,
-      },
-    }];
-  }) as StorefrontPuckData;
-}
+const TypedPuck = Puck as unknown as (props: {
+  config: unknown;
+  data: unknown;
+  onChange: (data: StorefrontEditorData) => void | Promise<void>;
+}) => JSX.Element;
 
 function patchEditorFormFieldAttributes() {
   const fields = document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
-    "input, select, textarea"
+    "input, select, textarea",
   );
 
   fields.forEach((field, index) => {
@@ -61,19 +35,17 @@ function patchEditorFormFieldAttributes() {
 }
 
 export default function StorefrontEditorPage() {
-  const params = useParams();
-  const router = useRouter();
+  const params = useParams<{ tenantId: string }>();
   const tenantId = params.tenantId as Id<"tenants">;
 
-  const storefrontData = useQuery(api.storefronts.getStorefrontByTenantId, {
-    tenantId,
-  });
-  const updateDraft = useMutation(api.storefronts.updateDraftPuckData);
+  const storefrontData = useQuery(api.storefronts.getStorefrontByTenantId, { tenantId });
+  const updateDraftPuckData = useMutation(api.storefronts.updateDraftPuckData);
   const publishStorefront = useMutation(api.storefronts.publishStorefront);
 
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [publishMessage, setPublishMessage] = useState<string | null>(null);
 
   useEffect(() => {
     patchEditorFormFieldAttributes();
@@ -86,123 +58,83 @@ export default function StorefrontEditorPage() {
     return () => observer.disconnect();
   }, []);
 
-  const handleChange = async (data: Data<PuckComponentProps>) => {
+  async function handleChange(data: StorefrontEditorData) {
     setSaving(true);
+    setPublishMessage(null);
+
     try {
-      // Puck sends full Data { root, content }; store only content array
-      // to stay compatible with StorefrontClient.tsx renderer
-      await updateDraft({ tenantId, puckData: data.content });
+      await updateDraftPuckData({
+        tenantId,
+        puckData: data.content,
+      });
       setLastSavedAt(new Date());
-    } catch (err) {
-      console.error("Failed to save draft:", err);
+    } catch (error) {
+      console.error("Failed to save draft storefront", error);
     } finally {
       setSaving(false);
     }
-  };
+  }
 
-  const handlePublish = async () => {
-    console.log("Publish clicked, tenantId:", tenantId);
-    if (!tenantId) {
-      console.error("Cannot publish: tenantId is undefined!");
-      alert("Error: tenantId is missing. Check the URL.");
-      setPublishing(false);
-      return;
-    }
+  async function handlePublish() {
     setPublishing(true);
+    setPublishMessage(null);
+
     try {
-      const result = await publishStorefront({ tenantId });
-      console.log("Publish succeeded, version:", result);
-      alert("Published successfully! Version: " + result);
-    } catch (err) {
-      console.error("Failed to publish:", err);
-      alert("Publish failed: " + (err as Error).message);
+      const version = await publishStorefront({ tenantId });
+      setPublishMessage(`Published v${version}`);
+    } catch (error) {
+      setPublishMessage(error instanceof Error ? error.message : "Failed to publish storefront.");
     } finally {
       setPublishing(false);
     }
-  };
+  }
 
   if (storefrontData === undefined) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Loading editor...</p>
-      </div>
-    );
+    return <div className="flex min-h-screen items-center justify-center text-sm text-gray-500">Loading storefront editor...</div>;
   }
 
-  if (!storefrontData) {
+  if (storefrontData === null) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-xl font-bold text-red-600 mb-2">Storefront Not Found</h1>
-          <p className="text-gray-500 mb-4">
-            Could not find a storefront for this tenant.
-          </p>
-          <button
-            onClick={() => router.push("/onboarding/storefront")}
-            className="text-blue-600 hover:underline"
-          >
-            Create a new storefront
-          </button>
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="max-w-md rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <h1 className="text-2xl font-semibold text-gray-950">Storefront not found</h1>
+          <p className="mt-3 text-sm text-gray-600">Generate a tenant storefront first, then return to the editor.</p>
+          <a href="/onboarding/storefront" className="mt-6 inline-flex rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">Create storefront</a>
         </div>
       </div>
     );
   }
 
-  const rawPuckData = storefrontData.storefront.puckData;
-  const puckContent = normalizePuckContent(rawPuckData);
-
-  const initialData: Data<PuckComponentProps> = {
-    root: { props: {} },
-    content: puckContent,
-  };
-
-  const tenant = storefrontData.tenant!;
+  const initialData = toPuckEditorData(storefrontData.storefront.draftPuckData);
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* Editor toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 z-10">
+    <div className="flex h-screen flex-col bg-gray-100">
+      <div className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
         <div className="flex items-center gap-3">
-          <h1 className="text-sm font-semibold text-gray-900">
-            {tenant.businessName}
-          </h1>
-          <span className="text-xs text-gray-400">
-            v{storefrontData.storefront.draftVersion || 0}
-          </span>
-          {saving && (
-            <span className="text-xs text-yellow-600">Saving...</span>
-          )}
-          {!saving && lastSavedAt && (
-            <span className="text-xs text-green-600">
-              Saved {lastSavedAt.toLocaleTimeString()}
-            </span>
-          )}
+          <div>
+            <div className="text-sm font-semibold text-gray-950">{storefrontData.tenant.businessName}</div>
+            <div className="text-xs text-gray-500">Draft v{storefrontData.storefront.draftVersion}</div>
+          </div>
+          {saving ? <span className="text-xs text-amber-600">Saving...</span> : null}
+          {!saving && lastSavedAt ? <span className="text-xs text-emerald-600">Saved {lastSavedAt.toLocaleTimeString()}</span> : null}
+          {publishMessage ? <span className="text-xs text-blue-700">{publishMessage}</span> : null}
         </div>
-        <div className="flex items-center gap-2">
-          <a
-            href={`/storefront/${tenant.slug}`}
-            target="_blank"
-            className="text-xs text-gray-500 hover:text-gray-700 underline"
-          >
-            View live
-          </a>
+
+        <div className="flex items-center gap-3">
+          <a href={`/storefront/${storefrontData.tenant.slug}`} target="_blank" className="text-xs font-medium text-gray-600 underline hover:text-gray-900">View live storefront</a>
           <button
-            onClick={handlePublish}
+            type="button"
+            onClick={() => void handlePublish()}
             disabled={publishing}
-            className="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50"
+            className="rounded-full bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {publishing ? "Publishing..." : "Publish"}
           </button>
         </div>
       </div>
 
-      {/* Puck editor */}
-      <div className="flex-1 overflow-hidden">
-        <Puck
-          config={puckConfig}
-          data={initialData}
-          onChange={handleChange}
-        />
+      <div className="min-h-0 flex-1 overflow-hidden">
+        {TypedPuck({ config: puckConfig, data: initialData, onChange: handleChange })}
       </div>
     </div>
   );
